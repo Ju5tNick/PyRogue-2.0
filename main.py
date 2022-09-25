@@ -26,11 +26,12 @@ class MainHero(pygame.sprite.Sprite):
         self.coords, self.hp, self.name, self.weapon, self.weapons = coords, hp, name, None, []
         self.rect, self.animation_counter, self.balance, self.xp_progress = pygame.Rect(coords[0], coords[1], 19, 31), 0, money, 1
         self.required_xp, self.level, self.max_hp, self.heal_counter, self.range = 10, 1, hp, 0, 100
-        self.walk_on_water = False
+        self.walk_on_water, self.stamina, self.current_stamina = False, 100, 100
+        self.speed = 4
 
         self.moves = {
-            "up": [0, -4], "down": [0, 4],
-            "left": [-4, 0], "right": [4, 0]
+            "up": [0, -self.speed], "down": [0, self.speed],
+            "left": [-self.speed, 0], "right": [self.speed, 0]
             }
 
         self.still = hero_sets["still"]
@@ -146,6 +147,15 @@ class MainHero(pygame.sprite.Sprite):
         if (abs(self.rect.x - mouse_coords[0]) ** 2 + abs(self.rect.y - mouse_coords[1]) ** 2) ** 0.5 <= self.range + 15:
             return True
         return False
+
+    def get_stamina(self):
+        return (self.stamina, self.current_stamina)
+
+    def add_stamin(self, value):
+        self.stamina += value
+
+    def running(self):
+        pass
 
 
 class Enemy(pygame.sprite.Sprite):
@@ -604,6 +614,9 @@ def draw_interface():
     # money_bar
     screen.blit(pygame.font.Font(None, 25).render(str(hero.get_balance()).rjust(5, '0'), True, (254, 226, 66)), (X * TILE_WIDTH - 70, 44))
     screen.blit(other_objects["coin"], (X * TILE_WIDTH - 21, 42))
+    # stamina
+    pygame.draw.rect(screen, (0, 0, 0), (X * TILE_WIDTH - 195, 24, 95, 17))
+    pygame.draw.rect(screen, (64, 105, 194), (X * TILE_WIDTH - 194, 25, (hero.get_stamina()[0] / hero.get_stamina()[1] * 95 - 2), 15))
 
 
 def terminate():
@@ -771,6 +784,8 @@ if __name__ == "__main__":
                             break
                         else:
                             is_chosen = [False, elem]
+            else:
+                is_chosen = [False, elem]
                             
 
             if event.type == pygame.MOUSEMOTION and pygame.mouse.get_focused():
