@@ -153,9 +153,20 @@ class MainHero(pygame.sprite.Sprite):
 
     def add_stamin(self, value):
         self.stamina += value
+        self.current_stamina = self.stamina
 
-    def running(self):
-        pass
+    def running(self, flag):
+        self.speed = 8 if flag and self.current_stamina >= 20 else 4
+
+        if flag and self.current_stamina > 5:
+            self.current_stamina -= 5
+        elif self.current_stamina < self.stamina:
+            self.current_stamina += 1
+
+        self.moves = {
+            "up": [0, -self.speed], "down": [0, self.speed],
+            "left": [-self.speed, 0], "right": [self.speed, 0]
+            }
 
 
 class Enemy(pygame.sprite.Sprite):
@@ -366,7 +377,6 @@ class Trader(pygame.sprite.Sprite):
         background.draw(screen)
         shop.draw(screen)
         
-
     def say(self, obj):
         screen.blit(pygame.font.Font(None, 25).render(obj.get_info(), True, (255, 255, 255)), (50, 44))
 
@@ -482,6 +492,7 @@ class Object(pygame.sprite.Sprite):
     def get_cost(self):
         return self.cost
         
+
 def render_map(chunk: list):
     cant_go = pygame.sprite.Group()
     can_go = pygame.sprite.Group()
@@ -616,7 +627,7 @@ def draw_interface():
     screen.blit(other_objects["coin"], (X * TILE_WIDTH - 21, 42))
     # stamina
     pygame.draw.rect(screen, (0, 0, 0), (X * TILE_WIDTH - 195, 24, 95, 17))
-    pygame.draw.rect(screen, (64, 105, 194), (X * TILE_WIDTH - 194, 25, (hero.get_stamina()[0] / hero.get_stamina()[1] * 95 - 2), 15))
+    pygame.draw.rect(screen, (64, 105, 194), (X * TILE_WIDTH - 194, 25, (hero.get_stamina()[1] / hero.get_stamina()[0] * 95 - 2), 15))
 
 
 def terminate():
@@ -682,7 +693,7 @@ if __name__ == "__main__":
     cur_x, cur_y = 2, 2
     is_trader, weapon_activated = False, False
     current_page, is_sold = 1, False
-    is_chosen = [False, ""]
+    is_chosen, is_shift = [False, ""], False
     clock = pygame.time.Clock()
 
     enemies = pygame.sprite.Group()
@@ -740,9 +751,10 @@ if __name__ == "__main__":
 
                 if keys[pygame.K_m] and nearest_trader.check():
                     is_trader = False if is_trader else True
-                    if is_trader:
-                        music("data/sounds/morshu.wav")
                     up, down, right, left = False, False, False, False
+
+                if keys[pygame.K_LSHIFT] and not is_trader and (up or down or left or right):
+                    is_shift = True
 
                 if keys[pygame.K_w] and not is_trader:
                     up, down = True, False
@@ -760,6 +772,9 @@ if __name__ == "__main__":
                     is_chosen = [False, ""]
                     
             if event.type == pygame.KEYUP and not is_trader:
+                if keys[pygame.K_LSHIFT]:
+                    is_shift = False
+
                 if keys[pygame.K_w]:
                     up = False
                     hero.move("up", stop=True) 
@@ -853,6 +868,8 @@ if __name__ == "__main__":
 
         schedule.run_pending()
         hero.heal()
+
+        hero.running(is_shift)
 
         if not is_trader:
             [elem.update() for elem in enemy_visions]
