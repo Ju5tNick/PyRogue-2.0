@@ -95,7 +95,22 @@ other_objects = {
 	"coin": load_image("data/images/objects/coin.png"),
 	"heart": load_image("data/images/objects/heart.png"),
 	"tall_grass": load_image(f"data/images/objects/tall_grass.png"),
-	"water_lily": load_image(f"data/images/objects/water_lily.png")  
+	"water_lily": load_image(f"data/images/objects/water_lily.png"),
+	"merchant": [load_image(f"data/images/trader/trader2.png"),
+				"Не надо на меня тыкать!"],
+	"background": [load_image(f"data/images/trader/ocr.jpg"), ""]
+
+}
+
+
+potions = {
+	
+	"potion1": [load_image("data/images/objects/potion1.png"),
+				"Зеленое зелье ... Цена: 10 Купить? (Y/N)", 10],
+	"potion2": [load_image("data/images/objects/potion2.png"),
+				"Синее зелье ... Цена: 15 Купить? (Y/N)", 15],
+	"potion3": [load_image("data/images/objects/potion3.png"),
+				"Красное зелье ... Цена: 20 Купить? (Y/N)", 20],
 
 }
 

@@ -4,9 +4,8 @@ import pygame
 import schedule
 import time
 
-from image_sets import load_image
-from image_sets import hero_sets, weapon_sets, enemy_sets, trader_sets, other_objects
 from classes import *
+from image_sets import *
 
 X, Y, FIELD_X, FIELD_Y = 40, 20, 5, 5
 TILE_WIDTH, TILE_HEIGT = 25, 25
@@ -22,10 +21,10 @@ TILE_WIDTH, TILE_HEIGT = 25, 25
 
 class MainHero(pygame.sprite.Sprite):
 
-    def __init__(self, coords, name, hp):
+    def __init__(self, coords, name, hp, money=0):
         super().__init__(all_sprites)
         self.coords, self.hp, self.name, self.weapon, self.weapons = coords, hp, name, None, []
-        self.rect, self.animation_counter, self.balance, self.xp_progress = pygame.Rect(coords[0], coords[1], 19, 31), 0, 0, 1
+        self.rect, self.animation_counter, self.balance, self.xp_progress = pygame.Rect(coords[0], coords[1], 19, 31), 0, money, 1
         self.required_xp, self.level, self.max_hp, self.heal_counter, self.range = 10, 1, hp, 0, 100
         self.walk_on_water = False
 
@@ -341,18 +340,10 @@ class Trader(pygame.sprite.Sprite):
             stock = int(30 / (eff_type + 1) / eff_value)
             self.trades.append([price, eff_type, eff_value, stock])
 
-    def sell(self, hero, idx):
-        if hero.balance >= self.trades[idx][0]:
-            if self.trades[idx][3] > 0:
-                if self.trades[idx][1] == 0:
-                    hero.add_hp(self.trades[idx][2])
-                else:
-                    [sword.add_damage(self.trades[idx][2]) for sword in weapons] 
-                self.trades[idx][3] -= 1
-                hero.buy(self.trades[idx][0])
-                sound("data/sounds/buy.wav")
-                return True
-        return False
+    def sell(self, mainhero, obj):
+        if hero.get_balance() - obj.get_cost() >= 0 and obj.get_cost() != 0:
+            sound("data/sounds/buy.wav")
+            hero.buy(obj.get_cost())
 
     def get_trades(self):
         return self.trades
@@ -362,32 +353,12 @@ class Trader(pygame.sprite.Sprite):
 
     def draw_interface(self):
         pygame.mouse.set_visible(True)
-        #screen.fill((120, 120, 120))
-        screen.blit(load_image("data/images/trader/ocr.jpg"), (0, 0))
-        for i in range(4):
-            screen.blit({1: weapons_logo, 0: dishes}[nearest_trader.get_trades()[current_page * 4 + i][1]][i], (5, 30 + 100 * i - 3))
-            screen.blit(pygame.font.Font(None, 30).render(f"Price: {nearest_trader.get_trades()[current_page * 4 + i][0]}, effect: {('HP', 'damage')[nearest_trader.get_trades()[current_page * 4 + i][1]]}, effect value: {nearest_trader.get_trades()[current_page * 4 + i][2]}, stock: {nearest_trader.get_trades()[current_page * 4 + i][3]}", True, (0, 0, 0)), (30, 30 + 100 * i))
-        screen.blit(pygame.font.Font(None, 40).render(
-            f"Previous",
-            True, (0, 0, 0)), (200, 420))
+        background.draw(screen)
+        shop.draw(screen)
+        
 
-        screen.blit(pygame.font.Font(None, 40).render(
-            f"Next",
-            True, (0, 0, 0)), (700, 420))
-
-        screen.blit(other_objects["chest"], (200 - 34, 420 - 7))
-        screen.blit(other_objects["shield"], (700 - 37, 420 - 7))
-        screen.blit(other_objects["label"], (550, 10))
-        screen.blit(other_objects["trader"], (700, 300))
-
-        if is_sold:
-            screen.blit(pygame.font.Font(None, 30).render(
-                "SOLD!", 
-                True, (255, 0, 0)), (460, 430))
-        else:
-            screen.blit(pygame.font.Font(None, 30).render(
-                "", 
-                True, (0, 0, 0)), (460, 430))                   
+    def say(self, obj):
+        screen.blit(pygame.font.Font(None, 25).render(obj.get_info(), True, (255, 255, 255)), (50, 44))
 
 
 class Weapon(pygame.sprite.Sprite):
@@ -471,6 +442,35 @@ class Enemies_clot(pygame.sprite.Sprite):
             hero.get_damage(self.damage)
             self.kill()
 
+
+class Object(pygame.sprite.Sprite):
+    def __init__(self, image, coords, size, can_move, info="", cost=0):
+        super().__init__(all_sprites)
+        self.image, self.coords, self.size, self.info = image, coords, size, info
+        self.cost = cost
+        self.can_move, self.counter = can_move, choice([1, -1])
+        self.rect = pygame.Rect(coords[0], coords[1], size[0], size[1])
+        self.mask = pygame.mask.from_surface(self.image)
+
+    def move(self):
+        if self.can_move:
+            if self.counter == 1:
+                self.rect = self.rect.move(0, 2)
+            else:
+                self.rect = self.rect.move(0, -2)
+            self.counter = self.counter * (-1)
+
+    def check(self, event_coords):
+        if (self.coords[0] <= event_coords[0] <= self.coords[0] + self.size[0] and
+            self.coords[1] <= event_coords[1] <= self.coords[1] + self.size[1]):
+            return True
+        return False
+
+    def get_info(self):
+        return self.info
+
+    def get_cost(self):
+        return self.cost
         
 def render_map(chunk: list):
     cant_go = pygame.sprite.Group()
@@ -652,6 +652,11 @@ def sound(filename):
     pygame.mixer.Sound(filename).play()
 
 
+def obj_move():
+    for elem in shop:
+        elem.move()
+        
+
 if __name__ == "__main__":
     pygame.init()
     screen = pygame.display.set_mode((X * TILE_WIDTH, Y * TILE_HEIGT))
@@ -664,6 +669,7 @@ if __name__ == "__main__":
     cur_x, cur_y = 2, 2
     is_trader, weapon_activated = False, False
     current_page, is_sold = 1, False
+    is_chosen = [False, ""]
     clock = pygame.time.Clock()
 
     enemies = pygame.sprite.Group()
@@ -671,19 +677,28 @@ if __name__ == "__main__":
     enemy_visions = pygame.sprite.Group()
     mainhero = pygame.sprite.Group()
     trader = pygame.sprite.Group()
+    shop = pygame.sprite.Group()
     clots = pygame.sprite.Group()
     weapons = pygame.sprite.Group()
+    background = pygame.sprite.Group()
 
     dishes = trader_sets["dishes"]
     weapons_logo = trader_sets["weapons_logo"]
     
-    hero = MainHero([10, 10], 'MainHero', 200) 
+    hero = MainHero([10, 10], 'MainHero', 200, money=200) 
     hero.add_weapon(Weapon(10, [20, 10], 100))
     nearest_trader = Trader()
     trader.add(nearest_trader)
     mainhero.add(hero)
     up, down, left, right = False, False, False, False 
 
+    background.add(Object(other_objects["background"][0], [0, 0], [X * TILE_WIDTH, Y * TILE_HEIGT], False))
+
+    for i, elem in enumerate(potions):
+        shop.add(Object(potions[elem][0], [650 + i * 22 , 278], [21, 21], True, info=potions[elem][1], cost=potions[elem][-1]))
+
+    shop.add(Object(other_objects["merchant"][0], [254, 276], [101, 107], True, info=other_objects["merchant"][1]))
+    
     chunk, other_obj = generate(no_water=True)
     can_go_tiles, cant_go_tiles = render_map(chunk)
     can_go_tiles.draw(screen)
@@ -696,10 +711,12 @@ if __name__ == "__main__":
     draw_interface()
 
     schedule.every(2).to(5).seconds.do(enemy_move)
-
+    schedule.every(0.5).seconds.do(obj_move)
+    
     start_screen()
 
     while True:
+        screen.fill((0, 0, 0))
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 # save()
@@ -722,6 +739,12 @@ if __name__ == "__main__":
                     down, up = True, False
                 if keys[pygame.K_d] and not is_trader:
                     right, left = True, False
+
+                if keys[pygame.K_y] and is_trader and is_chosen[0]:
+                    nearest_trader.sell(hero, is_chosen[1])
+
+                if keys[pygame.K_n] and is_trader and is_chosen[0]:
+                    is_chosen = [False, ""]
                     
             if event.type == pygame.KEYUP and not is_trader:
                 if keys[pygame.K_w]:
@@ -737,24 +760,18 @@ if __name__ == "__main__":
                     right = False
                     hero.move("right", stop=True)
 
-            if event.type == pygame.MOUSEBUTTONDOWN:
-
-                if is_trader:
-                    if 350 >= event.pos[0] >= 30:
-                        if event.pos[1] <= 345 and 45 >= event.pos[1] % 100 >= 30:
-                            if nearest_trader.sell(hero, current_page * 4 + event.pos[1] // 100):
-                                is_sold = True
-                            else:
-                                is_sold = False
-                    if 320 >= event.pos[0] >= 200 and 440 >= event.pos[1] >= 420:
-                        if current_page > 0:
-                            current_page -= 1
-                    if 760 >= event.pos[0] >= 700 and 440 >= event.pos[1] >= 420:
-                        if current_page < 4:
-                            current_page += 1
-
             if is_trader and nearest_trader.check():
                 nearest_trader.draw_interface()
+
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    for elem in shop:
+                        if elem.check(event.pos):
+                            is_chosen = [True, elem]
+                            nearest_trader.say(elem)
+                            break
+                        else:
+                            is_chosen = [False, elem]
+                            
 
             if event.type == pygame.MOUSEMOTION and pygame.mouse.get_focused():
                 if hero.check(event.pos) and not is_trader:
@@ -837,8 +854,13 @@ if __name__ == "__main__":
             mainhero.draw(screen)
             if weapon_activated:
                 weapons.draw(screen)
+        else:
+            nearest_trader.draw_interface()
 
-        draw_interface()
-            
+        draw_interface() 
+
+        if is_chosen[0]:
+            nearest_trader.say(elem)         
+
         pygame.display.flip()
-        clock.tick(120)
+        clock.tick(30)
