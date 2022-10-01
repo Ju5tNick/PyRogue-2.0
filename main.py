@@ -740,6 +740,8 @@ if __name__ == "__main__":
     start_screen()
 
     while True:
+
+
         screen.fill((0, 0, 0))
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -894,5 +896,6 @@ if __name__ == "__main__":
         if is_chosen[0]:
             nearest_trader.say(elem)         
 
+        screen.blit(load_image("data/images/enemies/boss/0.png"), (0, 0))
         pygame.display.flip()
         clock.tick(30)
