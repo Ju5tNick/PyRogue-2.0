@@ -19,7 +19,7 @@ class Slime(pygame.sprite.Sprite):
         self.range, self.die_flag, self.max_health = range, False, base_health
         self.rect = pygame.Rect(
             *[randrange(50, TILES_COUNT_X * TILE_WIDTH - 50), randrange(50, TILES_COUNT_Y * TILE_HEIGHT - 50)], 21, 24)
-        while pygame.sprite.spritecollideany(self, self.game["available_tile"]):
+        while not pygame.sprite.spritecollideany(self, self.game["available_tile"]):
             self.rect = pygame.Rect(
                 *[randrange(50, TILES_COUNT_X * TILE_WIDTH - 50), randrange(50, TILES_COUNT_Y * TILE_HEIGHT - 50)], 21,
                 24)
@@ -61,7 +61,7 @@ class Slime(pygame.sprite.Sprite):
                 self.vision.move(del_y, del_x)
                 self.rect = self.rect.move(del_y, del_x)
 
-            if self.game["hero"].check_water(self.game["available_tile"]):
+            if not self.game["hero"].check_water(self.game["available_tile"]):
                 self.can_move, self.attack = False, True
 
             if abs(self.game["hero"].get_coords()[0] - self.rect.x) <= 10 and abs(
@@ -128,10 +128,10 @@ class Slime(pygame.sprite.Sprite):
                     self.frames = self.slime_sets["still"] if stop else self.slime_sets["move"]
                 if self.attack:
                     self.frames, self.can_move, self.required_quantity = self.slime_sets["attack_animation"], False, 3
-                    if self.cur_frame == 6 and self.game["hero"].check_water(self.game["available_tile"]):
+                    if self.cur_frame == 6 and not self.game["hero"].check_water(self.game["available_tile"]):
                         self.clot = EnemyClot((self.rect.x, self.rect.y))
                         self.game["clots"].add(self.clot)
-                    elif self.cur_frame == 6 and not self.game["hero"].check_water(self.game["available_tile"]):
+                    elif self.cur_frame == 6 and self.game["hero"].check_water(self.game["available_tile"]):
                         self.attack, self.can_move, self.required_quantity = False, True, 5
                         self.clot = EnemyClot((self.rect.x, self.rect.y))
                         self.game["clots"].add(self.clot)

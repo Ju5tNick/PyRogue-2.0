@@ -1,64 +1,71 @@
 import pygame
 
-from classes import Weapon
-from helpers.config import TILE_WIDTH, TILE_HEIGHT, FIELD_SIZE_X, FIELD_SIZE_Y
+from classes.Weapon import Weapon
+from helpers.config import TILE_WIDTH, TILE_HEIGHT, TILES_COUNT_Y, TILES_COUNT_X
 from helpers.images import HERO_SETS
 
 
 class MainHero(pygame.sprite.Sprite):
 
-    walk_on_water = False
-    weapon = None
-    weapons = []
     hero_sets = HERO_SETS
     image = HERO_SETS["image"]
     cur_frame = 0
-    moves = {"up": [0, -4], "down": [0, 4], "left": [-4, 0], "right": [4, 0]}
+    speed = 4
 
     def __init__(self, coords, name, hp, money=0):
         super().__init__(pygame.sprite.Group())
+        self.set_speed()
         self.coords, self.hp, self.name = coords, hp, name
-        self.rect, self.animation_counter = pygame.Rect(coords[0], coords[1], 19, 31), 0
+        self.size = [19, 31]
+        self.rect, self.animation_counter = pygame.Rect(coords[0], coords[1], self.size[0], self.size[1]), 0
         self.balance, self.xp_progress = money, 1
         self.required_xp, self.level, self.max_hp, self.heal_counter, self.range = 10, 1, hp, 0, 100
 
+        self.weapon = Weapon(10, [20, 10], 100)
         self.mask = pygame.mask.from_surface(self.image)
         self.rect = self.rect.move(coords[0], coords[1])
+        self.stamina = self.current_stamina = 200
+        
 
     def move(self, chunk, direction, stop=False):
         direct = self.moves[direction].copy()
 
         if (
-                5 <= self.rect.x <= FIELD_SIZE_X * TILE_WIDTH - 5 and 5 <= self.rect.y <= FIELD_SIZE_Y * TILE_HEIGHT - 5
-                and not self.walk_on_water and 5 <= self.rect.x + 21 <= FIELD_SIZE_X * TILE_WIDTH - 5 and
-                5 <= self.rect.y + 24 <= FIELD_SIZE_Y * TILE_HEIGHT - 5 and not self.walk_on_water
+                5 <= self.rect.x <= TILES_COUNT_X * TILE_WIDTH - 5 and 5 <= self.rect.y <= TILES_COUNT_Y * TILE_HEIGHT - 5
+                and 5 <= self.rect.x + 21 <= TILES_COUNT_X * TILE_WIDTH - 5 and
+                5 <= self.rect.y + 24 <= TILES_COUNT_Y * TILE_HEIGHT - 5
         ):
-            if (
-                    chunk[int(self.rect.y / TILE_HEIGHT)][int((self.rect.x + direct[0]) / TILE_WIDTH)] in range(6, 9) or
-                    chunk[int(self.rect.y / TILE_HEIGHT)][int((self.rect.x + 21 + direct[0]) / TILE_WIDTH)] in range(6,
-                                                                                                                     9)
-            ):
-                direct[0] = 0
-                stop = True
-            else:
-                direct[0] = direct[0]
 
-            if (chunk[int((self.rect.y + direct[1]) / TILE_HEIGHT)][int(self.rect.x / TILE_WIDTH)] in range(6, 9) or
-                    chunk[int((self.rect.y + 24 + direct[1]) / TILE_HEIGHT)][int(self.rect.x / TILE_WIDTH)] in range(6,
-                                                                                                                     9)
+            if (
+                    chunk[self.rect.y // TILE_HEIGHT][self.rect.x // TILE_WIDTH] in range(6, 9) or
+                    chunk[(self.rect.y + self.size[1]) // TILE_HEIGHT][(self.rect.x + self.size[0]) // TILE_WIDTH] in range(6, 9)
             ):
-                direct[1] = 0
-                stop = True
+                self.speed = 2
             else:
-                direct[1] = direct[1]
+                self.speed = 4
+
+            self.set_speed()
+
+            if (
+                    chunk[self.rect.y // TILE_HEIGHT][self.rect.x // TILE_WIDTH] in range(6, 9) or
+                    chunk[(self.rect.y + self.size[1]) // TILE_HEIGHT][(self.rect.x + self.size[0]) // TILE_WIDTH] in range(6, 9)
+            ):
+                self.speed = 2
+            else:
+                self.speed = 4
+
+            self.set_speed()
 
         self.rect = self.rect.move(*direct)
 
         if stop:
-            self.image = self.hero_sets["still"][direction]
+            self.image = HERO_SETS["still"][direction]
             self.mask = pygame.mask.from_surface(self.image)
         else:
             self.update(direction)
+
+    def set_speed(self):
+        self.moves = {"up": [0, -self.speed], "down": [0, self.speed], "left": [-self.speed, 0], "right": [self.speed, 0]}
 
     def get_hp(self):
         return self.hp
@@ -74,7 +81,7 @@ class MainHero(pygame.sprite.Sprite):
         self.hp -= damage
         if self.hp <= 0:
             game.sound("assets/sounds/death_mh.mp3")
-            game.game_over()
+            game.game_over(game)
 
     def add_hp(self, hp):
         self.max_hp += hp
@@ -83,8 +90,8 @@ class MainHero(pygame.sprite.Sprite):
         if self.balance - price >= 0:
             self.balance -= price
 
-    def check_water(self, available_tile):
-        return pygame.sprite.spritecollideany(self, available_tile)
+    def check_water(self, tile):
+        return pygame.sprite.spritecollideany(self, tile)
 
     def update(self, direction):
         if self.animation_counter == 5:
@@ -111,16 +118,14 @@ class MainHero(pygame.sprite.Sprite):
     def get_coords(self):
         return self.rect.x, self.rect.y
 
+    def get_weapon(self):
+        return self.weapon
+
     def get_balance(self):
         return self.balance
 
     def get_ex(self):
         return self.xp_progress, self.required_xp, self.level
-
-    def add_weapon(self, weapon):
-        if type(weapon) is Weapon:
-            self.weapons.append(weapon)
-            self.weapon = weapon
 
     def attack(self, enemy):
         enemy.get_damage(self.weapon.get_damage())
@@ -138,3 +143,21 @@ class MainHero(pygame.sprite.Sprite):
                 self.rect.y - mouse_coords[1]) ** 2) ** 0.5 <= self.range + 15:
             return True
         return False
+
+    def get_stamina(self):
+        return (self.stamina, self.current_stamina)
+
+    def add_stamin(self, value):
+        self.stamina += value
+        self.current_stamina = self.stamina
+
+    def running(self, flag):
+        self.speed = self.speed * 2 if flag and self.current_stamina >= 20 else self.speed
+
+        self.set_speed()
+
+        if flag and self.current_stamina > 5:
+            self.current_stamina -= 5
+        elif self.current_stamina < self.stamina:
+            self.current_stamina += 1
+

@@ -21,8 +21,6 @@ class Game:
     cur_x = 2
     cur_y = 2
     is_trader_active = False
-    is_weapon_active = False
-    current_page, is_sold = 1, False
     is_chosen = [False, ""]
     clock = pygame.time.Clock()
 
@@ -43,8 +41,9 @@ class Game:
         pygame.display.set_caption('PyRogue')
         pygame.display.set_icon(OTHER_OBJECTS["logo"])
 
+        self.is_weapon_active = False
         self.hero = MainHero([10, 10], 'MainHero', 200, money=200)
-        self.hero.add_weapon(Weapon(10, [20, 10], 100))
+        self.weapons.add(self.hero.get_weapon())
         self.mainhero.add(self.hero)
         self.nearest_trader = Trader()
         self.trader.add(self.nearest_trader)
@@ -185,25 +184,30 @@ class Game:
 
     def draw_interface(self):
         # hp_bar
-        pygame.draw.rect(self.screen, (0, 0, 0), (FIELD_SIZE_X * TILE_WIDTH - 195, 5, 190, 17))
+        pygame.draw.rect(self.screen, (0, 0, 0), (TILES_COUNT_X * TILE_WIDTH - 195, 5, 190, 17))
         pygame.draw.rect(self.screen, (255, 0, 0),
-                         (FIELD_SIZE_X * TILE_WIDTH - 194, 6, (self.hero.get_hp() / self.hero.get_max_hp() * 190 - 2), 15))
+                         (TILES_COUNT_X * TILE_WIDTH - 194, 6, (self.hero.get_hp() / self.hero.get_max_hp() * 190 - 2), 15))
 
         self.screen.blit(pygame.font.Font(None, 21).render(str(self.hero.get_hp()).rjust(3, '0'), True, (255, 255, 255)),
-                    (FIELD_SIZE_X * TILE_WIDTH - 100, 7))
-        self.screen.blit(OTHER_OBJECTS["heart"], (FIELD_SIZE_X * TILE_WIDTH - 115, 6))
+                    (TILES_COUNT_X * TILE_WIDTH - 100, 7))
+        self.screen.blit(OTHER_OBJECTS["heart"], (TILES_COUNT_X * TILE_WIDTH - 115, 6))
 
         # experience_bar
-        pygame.draw.rect(self.screen, (0, 0, 0), (FIELD_SIZE_X * TILE_WIDTH - 95, 24, 90, 17))
+        pygame.draw.rect(self.screen, (0, 0, 0), (TILES_COUNT_X * TILE_WIDTH - 95, 24, 90, 17))
         pygame.draw.rect(self.screen, (255, 255, 255),
-                         (FIELD_SIZE_X * TILE_WIDTH - 94, 25, (self.hero.get_ex()[0] / self.hero.get_ex()[1] * 90 - 1), 15))
+                         (TILES_COUNT_X * TILE_WIDTH - 94, 25, (self.hero.get_ex()[0] / self.hero.get_ex()[1] * 90 - 1), 15))
         self.screen.blit(
             pygame.font.Font(None, 14).render(f"lvl: {self.hero.get_ex()[-1]} exp: {self.hero.get_ex()[0]} / {self.hero.get_ex()[1]}",
-                                              True, (120, 120, 120)), (FIELD_SIZE_X * TILE_WIDTH - 90, 28))
+                                              True, (120, 120, 120)), (TILES_COUNT_X * TILE_WIDTH - 90, 28))
         # money_bar
         self.screen.blit(pygame.font.Font(None, 25).render(str(self.hero.get_balance()).rjust(5, '0'), True, (254, 226, 66)),
-                    (FIELD_SIZE_X * TILE_WIDTH - 70, 44))
-        self.screen.blit(OTHER_OBJECTS["coin"], (FIELD_SIZE_X * TILE_WIDTH - 21, 42))
+                    (TILES_COUNT_X * TILE_WIDTH - 70, 44))
+        self.screen.blit(OTHER_OBJECTS["coin"], (TILES_COUNT_X * TILE_WIDTH - 21, 42))
+
+        # stamina
+        pygame.draw.rect(self.screen, (0, 0, 0), (TILES_COUNT_X * TILE_WIDTH - 195, 24, 95, 17))
+        pygame.draw.rect(self.screen, (64, 105, 194), (TILES_COUNT_X * TILE_WIDTH - 194, 25, (self.hero.get_stamina()[1] 
+                        / self.hero.get_stamina()[0] * 95 - 2), 15))
 
     @staticmethod
     def terminate():
@@ -233,7 +237,7 @@ class Game:
                 if event.type == pygame.QUIT:
                     self.terminate()
                 if event.type == pygame.MOUSEBUTTONDOWN:
-                    self.terminate()
+                    self.start_screen(self)
                 self.screen.blit(image, (0, 0))
                 pygame.display.flip()
 
@@ -261,6 +265,8 @@ class Game:
         self.mainhero.draw(self.screen)
         self.weapons.draw(self.screen)
         self.draw_interface()
+        self.is_chosen = [False, ""]
+        self.is_running = False
 
         schedule.every(2).to(5).seconds.do(self.enemy_move)
         schedule.every(0.5).seconds.do(self.obj_move)
@@ -297,7 +303,20 @@ class Game:
                     if keys[pygame.K_n] and self.is_trader_active and self.is_chosen[0]:
                         self.is_chosen = [False, ""]
 
+                    if self.hero.get_stamina()[1] <= 20:
+                        
+                        self.is_running = False                        
+
+                    else:
+                        if (keys[pygame.K_LSHIFT] and not self.is_trader_active and 
+                            (self.up or self.down or self.left or self.right)):
+                            self.is_running = True
+
+
                 if event.type == pygame.KEYUP and not self.is_trader_active:
+                    if keys[pygame.K_LSHIFT]:
+                        self.is_running = False
+
                     if keys[pygame.K_w]:
                         self.up = False
                         self.hero.move(self.chunk, "up", stop=True)
@@ -322,192 +341,21 @@ class Game:
                                 break
                             else:
                                 self.is_chosen = [False, elem]
-
-                if event.type == pygame.MOUSEMOTION and pygame.mouse.get_focused():
-                    if self.hero.check(event.pos) and not self.is_trader_active:
-                        weapon_activated = True
-                        pygame.mouse.set_visible(False)
-                    else:
-                        weapon_activated = False
-                        pygame.mouse.set_visible(True)
-
-                    if weapon_activated:
-                        [sword.move(*event.pos, *event.rel) for sword in self.weapons]
-
-            if self.up:
-                self.hero.move(self.chunk, "up")
-            elif self.down:
-                self.hero.move(self.chunk, "down")
-            elif self.left:
-                self.hero.move(self.chunk, "left")
-            elif self.right:
-                self.hero.move(self.chunk, "right")
-
-            x, y = self.hero.get_coords()[0], self.hero.get_coords()[1]
-
-            if TILES_COUNT_X * TILE_WIDTH <= x or x <= 0 or TILES_COUNT_Y * TILE_HEIGHT <= y or y <= 0:
-
-                if TILES_COUNT_X * TILE_WIDTH <= x:
-                    self.cur_x += 1
-                if x <= 0:
-                    self.cur_x -= 1
-                if TILES_COUNT_Y * TILE_HEIGHT <= y:
-                    self.cur_y += 1
-                if y <= 0:
-                    self.cur_y -= 1
-
-                cur_x = FIELD_SIZE_X - 1 if self.cur_x < 0 else self.cur_x
-                cur_y = FIELD_SIZE_Y - 1 if self.cur_y < 0 else self.cur_y
-                cur_x = 0 if cur_x >= FIELD_SIZE_X else cur_x
-                cur_y = 0 if cur_y >= FIELD_SIZE_Y else cur_y
-
-                if self.field[cur_y][cur_x] is None:
-                    chunk, other_obj = self.generate()
-                    self.available_tile, self.unavailable_tile = self.render_map(chunk)
-                    self.enemy_visions = pygame.sprite.Group()
-                    self.enemies = pygame.sprite.Group()
-                    self.trader = pygame.sprite.Group()
-                    self.clots = pygame.sprite.Group()
-                    for _ in range(randrange(10, 20)):
-                        params = {
-                            "hero": self.hero,
-                            "chunk": self.chunk,
-                            "available_tile": self.available_tile,
-                            "enemy_visions": self.enemy_visions,
-                            "sound": self.sound,
-                            "music": self.music,
-                            "clots": self.clots,
-                        }
-                        self.enemies.add(Slime("name", 10, 100, 2, 5, randrange(5, 15), randrange(10, 21), params))
-                    self.field[cur_y][cur_x] = self.available_tile, self.unavailable_tile, self.other_obj, self.enemies, self.enemy_visions, self.trader, self.clots, self.chunk
                 else:
-                    self.available_tile, self.unavailable_tile, self.other_obj, self.enemies, self.enemy_visions, self.trader, self.clots, self.chunk = self.field[cur_y][cur_x]
-
-            if TILES_COUNT_X * TILE_WIDTH <= self.hero.get_coords()[0]:
-                self.hero.set_coords(1, self.hero.get_coords()[1])
-
-            elif self.hero.get_coords()[0] <= 0:
-                self.hero.set_coords(TILES_COUNT_X * TILE_WIDTH, self.hero.get_coords()[1])
-
-            if TILES_COUNT_Y * TILE_HEIGHT <= self.hero.get_coords()[1]:
-                self.hero.set_coords(self.hero.get_coords()[0], 1)
-
-            elif self.hero.get_coords()[1] <= 0:
-                self.hero.set_coords(self.hero.get_coords()[0], TILES_COUNT_Y * TILE_HEIGHT)
-
-            schedule.run_pending()
-            self.hero.heal()
-
-            if not self.is_trader_active:
-                [elem.update() for elem in self.enemy_visions]
-                [clot.move(self.hero, self.mainhero, self.weapons, Game) for clot in self.clots]
-                [elem.move(self.hero.get_coords(), self.mainhero) for elem in self.enemies]
-                self.available_tile.draw(self.screen)
-                self.unavailable_tile.draw(self.screen)
-                self.other_obj.draw(self.screen)
-                self.trader.draw(self.screen)
-                self.enemy_visions.draw(self.screen)
-                self.enemies.draw(self.screen)
-                self.clots.draw(self.screen)
-                pygame.draw.circle(self.screen, (70, 79, 21), (self.hero.get_coords()[0] + 19 / 2, self.hero.get_coords()[1] + 31 / 2),
-                                   self.hero.get_range(), 1)
-                self.mainhero.draw(self.screen)
-                if self.is_weapon_active:
-                    self.weapons.draw(self.screen)
-            else:
-                self.nearest_trader.draw_interface(Game)
-
-            self.draw_interface()
-
-            if self.is_chosen[0]:
-                self.nearest_trader.say(elem, self.screen)
-
-            pygame.display.flip()
-            self.clock.tick(30)
-
-    def loop2(self):
-        self.available_tile.draw(self.screen)
-        self.unavailable_tile.draw(self.screen)
-        self.field[self.cur_y][self.cur_x] = (self.available_tile, self.unavailable_tile,
-            self.other_obj, self.enemies, self.enemy_visions, self.trader, self.clots, self.chunk
-        )
-        self.trader.draw(self.screen)
-        self.clots.draw(self.screen)
-        self.mainhero.draw(self.screen)
-        self.weapons.draw(self.screen)
-        self.draw_interface()
-
-        schedule.every(2).to(5).seconds.do(self.enemy_move)
-        schedule.every(0.5).seconds.do(self.obj_move)
-
-        self.start_screen()
-
-        while True:
-            self.screen.fill((0, 0, 0))
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    self.terminate()
-
-                if event.type == pygame.KEYDOWN:
-                    keys, flag = pygame.key.get_pressed(), True
-
-                    if keys[pygame.K_m] and self.nearest_trader.check(self.mainhero):
-                        self.is_trader_active = not self.is_trader_active
-                        if self.is_trader_active:
-                            self.music("assets/sounds/morshu.wav")
-                        self.up, self.down, self.right, self.left = False, False, False, False
-
-                    if keys[pygame.K_w] and not self.is_trader_active:
-                        self.up, self.down = True, False
-                    if keys[pygame.K_a] and not self.is_trader_active:
-                        self.left, self.right = True, False
-                    if keys[pygame.K_s] and not self.is_trader_active:
-                        self.down, self.up = True, False
-                    if keys[pygame.K_d] and not self.is_trader_active:
-                        self.right, self.left = True, False
-
-                    if keys[pygame.K_y] and self.is_trader_active and self.is_chosen[0]:
-                        self.nearest_trader.sell(self.hero, self.hero, self.is_chosen[1])
-
-                    if keys[pygame.K_n] and self.is_trader_active and self.is_chosen[0]:
-                        self.is_chosen = [False, ""]
-
-                if event.type == pygame.KEYDOWN and not self.is_trader_active:
-                    if keys[pygame.K_w]:
-                        self.up = False
-                        self.hero.move(self.chunk, "up", stop=True)
-                    if keys[pygame.K_a]:
-                        self.left = False
-                        self.hero.move(self.chunk, "left", stop=True)
-                    if keys[pygame.K_s]:
-                        self.down = False
-                        self.hero.move(self.chunk, "down", stop=True)
-                    if keys[pygame.K_d]:
-                        self.right = False
-                        self.hero.move(self.chunk, "right", stop=True)
-
-                if self.is_trader_active and self.nearest_trader.check(self.mainhero):
-                    self.nearest_trader.draw_interface(Game)
-
-                    if event.type == pygame.MOUSEBUTTONDOWN:
-                        for elem in self.shop:
-                            if elem.check(event.pos):
-                                self.is_chosen = [True, elem]
-                                self.nearest_trader.say(elem, self.screen)
-                                break
-                            else:
-                                self.is_chosen = [False, elem]
+                    self.is_chosen = [False, ""]
 
                 if event.type == pygame.MOUSEMOTION and pygame.mouse.get_focused():
+
                     if self.hero.check(event.pos) and not self.is_trader_active:
-                        weapon_activated = True
+                        self.is_weapon_active = True
                         pygame.mouse.set_visible(False)
                     else:
-                        weapon_activated = False
+                        self.is_weapon_active = False
                         pygame.mouse.set_visible(True)
 
-                    if weapon_activated:
-                        [sword.move(*event.pos, *event.rel) for sword in self.weapons]
+                    if self.is_weapon_active:
+                        for elem in self.weapons:
+                            self.is_weapon_active = elem.move(*event.pos, *event.rel, self.hero, self.enemies, self.is_weapon_active)
 
             if self.up:
                 self.hero.move(self.chunk, "up")
@@ -538,27 +386,25 @@ class Game:
 
                 if self.field[cur_y][cur_x] is None:
                     self.chunk, self.other_obj = self.generate()
-                    can_go_tiles, cant_go_tiles = self.render_map(self.chunk)
-                    enemy_visions = pygame.sprite.Group()
-                    enemies = pygame.sprite.Group()
-                    trader = pygame.sprite.Group()
-                    clots = pygame.sprite.Group()
-                    for _ in range(randrange(10, 20)):
+                    self.available_tile, self.unavailable_tile = self.render_map(self.chunk)
+                    self.enemy_visions = pygame.sprite.Group()
+                    self.enemies = pygame.sprite.Group()
+                    self.trader = pygame.sprite.Group()
+                    self.clots = pygame.sprite.Group()
+                    for _ in range(randrange(1, 3)):
                         params = {
                             "hero": self.hero,
                             "chunk": self.chunk,
                             "available_tile": self.available_tile,
-                            "enemy_visions": enemy_visions,
+                            "enemy_visions": self.enemy_visions,
                             "sound": self.sound,
                             "music": self.music,
                             "clots": self.clots,
                         }
-                        enemies.add(Slime("name", 10, 100, 2, 5, randrange(5, 15), randrange(10, 21), params))
-                    self.field[cur_y][self.cur_x] = (
-                        can_go_tiles, cant_go_tiles, self.other_obj, enemies, enemy_visions, trader, clots, self.chunk)
+                        self.enemies.add(Slime("name", 10, 100, 2, 5, randrange(5, 15), randrange(10, 21), params))
+                    self.field[cur_y][cur_x] = self.available_tile, self.unavailable_tile, self.other_obj, self.enemies, self.enemy_visions, self.trader, self.clots, self.chunk
                 else:
-                    can_go_tiles, cant_go_tiles, other_obj, enemies, enemy_visions, trader, clots, self.chunk = \
-                        self.field[cur_y][cur_x]
+                    self.available_tile, self.unavailable_tile, self.other_obj, self.enemies, self.enemy_visions, self.trader, self.clots, self.chunk = self.field[cur_y][cur_x]
 
             if TILES_COUNT_X * TILE_WIDTH <= self.hero.get_coords()[0]:
                 self.hero.set_coords(1, self.hero.get_coords()[1])
@@ -574,11 +420,12 @@ class Game:
 
             schedule.run_pending()
             self.hero.heal()
+            self.hero.running(self.is_running)
 
             if not self.is_trader_active:
                 [elem.update() for elem in self.enemy_visions]
-                [clot.move() for clot in self.clots]
-                [elem.move(self.hero.get_coords()) for elem in self.enemies]
+                [clot.move(self.hero, self.mainhero, self.weapons, Game) for clot in self.clots]
+                [elem.move(self.hero.get_coords(), self.mainhero) for elem in self.enemies]
                 self.available_tile.draw(self.screen)
                 self.unavailable_tile.draw(self.screen)
                 self.other_obj.draw(self.screen)
@@ -586,12 +433,8 @@ class Game:
                 self.enemy_visions.draw(self.screen)
                 self.enemies.draw(self.screen)
                 self.clots.draw(self.screen)
-                pygame.draw.circle(
-                    self.screen, (70, 79, 21),
-                    (self.hero.get_coords()[0] + 19 / 2, self.hero.get_coords()[1] + 31 / 2),
-                    self.hero.get_range(),
-                    1
-                )
+                pygame.draw.circle(self.screen, (70, 79, 21), (self.hero.get_coords()[0] + 19 / 2, self.hero.get_coords()[1] + 31 / 2),
+                                   self.hero.get_range(), 1)
                 self.mainhero.draw(self.screen)
                 if self.is_weapon_active:
                     self.weapons.draw(self.screen)

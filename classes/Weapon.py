@@ -17,8 +17,7 @@ class Weapon(pygame.sprite.Sprite):
             "++": -90, "=+": -135, "-+": -180, "-=": 135, "": -1, "--": 90, "=-": 45, "+-": 0, "+=": -45, "==": -1
         }
 
-    def move(self, x, y, del_x, del_y, hero, enemies):
-        global weapon_activated
+    def move(self, x, y, del_x, del_y, hero, enemies, weapon_activated):
         if hero.check((x, y)):
             pygame.mouse.set_visible(False)
             weapon_activated = True
@@ -35,6 +34,7 @@ class Weapon(pygame.sprite.Sprite):
             weapon_activated = False
             pygame.mouse.set_visible(True)
             self.rect.x, self.rect.y = hero.get_coords()[0], hero.get_coords()[1]
+        return weapon_activated
 
     def get_range(self):
         return self.range
