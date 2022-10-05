@@ -135,7 +135,6 @@ class MainHero(pygame.sprite.Sprite):
             self.level += 1
             self.xp_progress -= self.required_xp
             self.required_xp = round(self.required_xp * 1.8)
-            self.max_hp += 5
         self.walk_on_water = True if self.level >= 15 else False
 
     def check(self, mouse_coords):
@@ -144,12 +143,14 @@ class MainHero(pygame.sprite.Sprite):
             return True
         return False
 
+    def add_damage(self, value):
+        self.weapon.add_damage(value)
+
     def get_stamina(self):
         return (self.stamina, self.current_stamina)
 
-    def add_stamin(self, value):
+    def add_stamina(self, value):
         self.stamina += value
-        self.current_stamina = self.stamina
 
     def running(self, flag):
         self.speed = self.speed * 2 if flag and self.current_stamina >= 20 else self.speed

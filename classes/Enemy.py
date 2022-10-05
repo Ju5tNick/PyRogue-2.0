@@ -34,27 +34,34 @@ class EnemyClot(pygame.sprite.Sprite):
         self.rect = pygame.Rect(coords[0], coords[1], 10, 10)
         self.mask = pygame.mask.from_surface(self.image)
 
-        self.speed, self.damage = 6.9, randrange(20, 45)
+        self.direction = []
+        self.speed, self.damage = 6.9, 1
 
     def move(self, hero, mainhero, weapons, game):
         if pygame.sprite.spritecollide(self, weapons, False):
             self.kill()
 
-        move = [self.speed, 0, -self.speed]
-        diff_y, diff_x = abs(hero.get_coords()[0] - self.rect.x), abs(hero.get_coords()[1] - self.rect.y)
-        del_x, del_y = 0, 0
+        if self.direction == []:
+            move = [self.speed * 2, 0, -self.speed * 2]
+            diff_y, diff_x = abs(hero.get_coords()[0] - self.rect.x), abs(hero.get_coords()[1] - self.rect.y)
+            del_x, del_y = 0, 0
 
-        if abs(hero.get_coords()[0]) - abs(self.rect.x) != 1:
-            for elem in move:
-                if abs(hero.get_coords()[0] - (self.rect.x + elem)) < diff_y:
-                    del_y, flag = elem, False
+            if abs(hero.get_coords()[0]) - abs(self.rect.x) != 1:
+                for elem in move:
+                    if abs(hero.get_coords()[0] - (self.rect.x + elem)) < diff_y:
+                        del_y, flag = elem, False
 
-        if abs(hero.get_coords()[1]) - abs(self.rect.y) != 1:
-            for elem in move:
-                if abs(hero.get_coords()[1] - (self.rect.y + elem)) < diff_x:
-                    del_x, flag = elem, False
+            if abs(hero.get_coords()[1]) - abs(self.rect.y) != 1:
+                for elem in move:
+                    if abs(hero.get_coords()[1] - (self.rect.y + elem)) < diff_x:
+                        del_x, flag = elem, False
 
-        self.rect = self.rect.move(del_y, del_x)
+            y = del_y if del_y == 0 else diff_y / del_y
+            x = del_x if del_x == 0 else diff_x / del_x
+
+            self.direction = [y, x]
+
+        self.rect = self.rect.move(*self.direction)
         if pygame.sprite.spritecollide(self, mainhero, False):
             hero.get_damage(self.damage, game)
             self.kill()

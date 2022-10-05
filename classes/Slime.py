@@ -64,8 +64,8 @@ class Slime(pygame.sprite.Sprite):
             if not self.game["hero"].check_water(self.game["available_tile"]):
                 self.can_move, self.attack = False, True
 
-            if abs(self.game["hero"].get_coords()[0] - self.rect.x) <= 10 and abs(
-                    self.game["hero"].get_coords()[1] - self.rect.y) <= 10 and not self.die_flag:
+            if abs(self.game["hero"].get_coords()[0] - self.rect.x) <= 200 and abs(
+                    self.game["hero"].get_coords()[1] - self.rect.y) <= 200 and not self.die_flag:
                 self.attack = True
         else:
             self.attack = False

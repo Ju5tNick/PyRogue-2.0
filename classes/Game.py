@@ -54,10 +54,8 @@ class Game:
             False
         ))
 
-        for i, elem in enumerate(POTIONS):
-            self.shop.add(Object(
-                POTIONS[elem][0], [650 + i * 22, 278], [21, 21], True, info=POTIONS[elem][1], cost=POTIONS[elem][-1]
-            ))
+        for potion in self.nearest_trader.get_trades():
+            self.shop.add(potion)
 
         self.shop.add(
             Object(OTHER_OBJECTS["merchant"][0], [254, 276], [101, 107], True, info=OTHER_OBJECTS["merchant"][1])
@@ -223,12 +221,14 @@ class Game:
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if 772 <= event.pos[0] <= 832 and 249 <= event.pos[1] <= 271:
                         running = False
+
                     if 787 <= event.pos[0] <= 832 and 276 <= event.pos[1] <= 293:
                         self.terminate()
                 self.screen.blit(image, (0, 0))
                 pygame.display.flip()
 
     def game_over(self):
+        self.is_first_session = False
         image, running = OTHER_OBJECTS["game_over"], True
         time.sleep(0.1)
         self.music("assets/sounds/game_over.mp3")
@@ -337,7 +337,7 @@ class Game:
                         for elem in self.shop:
                             if elem.check(event.pos):
                                 self.is_chosen = [True, elem]
-                                self.nearest_trader.say(elem, self.screen)
+                                self.nearest_trader.say(self.screen, obj=elem)
                                 break
                             else:
                                 self.is_chosen = [False, elem]
@@ -391,7 +391,7 @@ class Game:
                     self.enemies = pygame.sprite.Group()
                     self.trader = pygame.sprite.Group()
                     self.clots = pygame.sprite.Group()
-                    for _ in range(randrange(1, 3)):
+                    for _ in range(randrange(5, 10)):
                         params = {
                             "hero": self.hero,
                             "chunk": self.chunk,
@@ -444,7 +444,7 @@ class Game:
             self.draw_interface()
 
             if self.is_chosen[0]:
-                self.nearest_trader.say(elem, self.screen)
+                self.nearest_trader.say(self.screen, obj=elem)
 
             pygame.display.flip()
             self.clock.tick(30)

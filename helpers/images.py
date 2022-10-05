@@ -136,17 +136,17 @@ OTHER_OBJECTS = {
 POTIONS = {
     "potion1": [
         load_image(IMAGES_BASE_PATH + "objects/potion1.png"),
-        "Зеленое зелье ... Цена: 10 Купить? (Y/N)",
-        10,
+        "Зеленое зелье увеличивает здоровье на 5hp Цена: 10 Купить? (Y/N)",
+        10, "health", 5
     ],
     "potion2": [
         load_image(IMAGES_BASE_PATH + "objects/potion2.png"),
-        "Синее зелье ... Цена: 15 Купить? (Y/N)",
-        15,
+        "Синее зелье увеличивает стамину на 15 единиц Цена: 15 Купить? (Y/N)",
+        15, "stamina", 15
     ],
     "potion3": [
         load_image(IMAGES_BASE_PATH + "objects/potion3.png"),
-        "Красное зелье ... Цена: 20 Купить? (Y/N)",
-        20,
+        "Красное зелье увеличивает урон твоего меча на 15 единиц Цена: 20 Купить? (Y/N)",
+        20, "damage", 15
     ],
 }
