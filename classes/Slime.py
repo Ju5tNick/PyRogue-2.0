@@ -40,20 +40,23 @@ class Slime(pygame.sprite.Sprite):
         flag = True
         if self.frames == self.slime_sets["die_animation"]:
             self.can_move = False
-        if self.vision.check(mainhero) or self.angry:
+
+        if self.vision.check(mainhero) and not self.angry:
+            self.get_angry = True
+
+        if self.angry:
             if self.can_move:
-                self.get_angry = True
                 move = [self.speed, 0, -self.speed]
 
                 diff_y, diff_x = abs(hero_coords[0] - self.rect.x), abs(hero_coords[1] - self.rect.y)
                 del_x, del_y = 0, 0
 
-                if abs(hero_coords[0]) - abs(self.rect.x) != 10:
+                if abs(hero_coords[0]) - abs(self.rect.x) != 20:
                     for elem in move:
                         if abs(hero_coords[0] - (self.rect.x + elem)) < diff_y:
                             del_y, flag = elem, False
 
-                if abs(hero_coords[1]) - abs(self.rect.y) != 10:
+                if abs(hero_coords[1]) - abs(self.rect.y) != 20:
                     for elem in move:
                         if abs(hero_coords[1] - (self.rect.y + elem)) < diff_x:
                             del_x, flag = elem, False
@@ -61,18 +64,12 @@ class Slime(pygame.sprite.Sprite):
                 self.vision.move(del_y, del_x)
                 self.rect = self.rect.move(del_y, del_x)
 
-            if not self.game["hero"].check_water(self.game["available_tile"]):
-                self.can_move, self.attack = False, True
-
             if abs(self.game["hero"].get_coords()[0] - self.rect.x) <= 200 and abs(
-                    self.game["hero"].get_coords()[1] - self.rect.y) <= 200 and not self.die_flag:
+                    self.game["hero"].get_coords()[1] - self.rect.y) <= 200 and not self.die_flag and self.angry:
                 self.attack = True
+                
         else:
-            self.attack = False
-
-            if self.angry and self.get_angry:
-                self.angry, self.get_angry = False, False
-
+            
             if self.flag == 1 and not self.angry and not self.get_angry and self.direction != [0, 0] and self.can_move:
                 flag = False
                 if self.rect.x + 1 >= TILES_COUNT_X * TILE_WIDTH - 50 or \
@@ -90,58 +87,44 @@ class Slime(pygame.sprite.Sprite):
                     int(self.rect.x / TILE_WIDTH)] in range(6, 9):
                     self.direction[1] = 1
 
-                if self.game["chunk"][int((self.rect.y - 1) / TILE_HEIGHT)][
-                    int((self.rect.x - 1) / TILE_WIDTH)] in range(6, 9):
-                    self.direction[1] = 1
-                    self.direction[0] = 1
-                elif self.game["chunk"][int((self.rect.y + 1) / TILE_HEIGHT)][
-                    int((self.rect.x - 1) / TILE_WIDTH)] in range(6, 9):
-                    self.direction[1] = -1
-                    self.direction[0] = 1
-                elif self.game["chunk"][int((self.rect.y - 1) / TILE_HEIGHT)][
-                    int((self.rect.x + 1) / TILE_WIDTH)] in range(6, 9):
-                    self.direction[1] = 1
-                    self.direction[0] = -1
-                elif self.game["chunk"][int((self.rect.y + 1) / TILE_HEIGHT)][
-                    int((self.rect.x + 1) / TILE_WIDTH)] in range(6, 9):
-                    self.direction[1] = -1
-                    self.direction[0] = -1
-
                 self.rect = self.rect.move(self.direction[0], self.direction[1])
                 self.vision.move(self.direction[0], self.direction[1])
 
-        self.update(stop=flag)
+        self.update(stop=flag) 
 
     def update(self, stop=False):
         if self.animation_counter == self.required_quantity:
             if not self.die_flag:
-                if self.angry:
-                    self.frames, self.speed, self.can_move = self.slime_sets["angry_move"], 5.9, True
-                    # self.angry = False if not self.vision.check() else True
-                elif self.get_angry:
+                
+                if self.get_angry:
                     self.frames, self.can_move, self.required_quantity = self.slime_sets["gets_angry"], False, 7
+
                     if self.cur_frame == 3:
                         self.game["sound"]("assets/sounds/get_angry_e.wav")
                         self.angry, self.get_angry, self.required_quantity = True, False, 5
+
+                elif self.angry and not self.get_angry:
+                    self.frames, self.speed, self.can_move = self.slime_sets["angry_move"], 5.9, True
+                    self.get_angry = False
+
                 else:
-                    self.speed = 2
                     self.frames = self.slime_sets["still"] if stop else self.slime_sets["move"]
-                if self.attack:
-                    self.frames, self.can_move, self.required_quantity = self.slime_sets["attack_animation"], False, 3
-                    if self.cur_frame == 6 and not self.game["hero"].check_water(self.game["available_tile"]):
-                        self.clot = EnemyClot((self.rect.x, self.rect.y))
-                        self.game["clots"].add(self.clot)
-                    elif self.cur_frame == 6 and self.game["hero"].check_water(self.game["available_tile"]):
-                        self.attack, self.can_move, self.required_quantity = False, True, 5
-                        self.clot = EnemyClot((self.rect.x, self.rect.y))
-                        self.game["clots"].add(self.clot)
-                elif not self.attack and not self.angry and not self.get_angry:
-                    self.speed, self.can_move, self.required_quantity = 2, True, 5
-                    self.frames = self.slime_sets["still"] if stop else self.slime_sets["move"]
+
+
+                if self.attack and not self.get_angry:
+                    for _ in range(randrange(1, 4)):
+                        self.frames, self.can_move, self.required_quantity = self.slime_sets["attack_animation"], False, 3
+
+                        if self.cur_frame == 6:
+                            self.clot = EnemyClot((self.rect.x, self.rect.y))                    
+                            self.game["clots"].add(self.clot)
+                            self.attack, self.can_move = False, True
+
             else:
                 if self.image == self.slime_sets["die_animation"][-1]:
                     self.kill()
                 self.frames = self.slime_sets["die_animation"]
+
             self.cur_frame = (self.cur_frame + 1) % len(self.frames)
             self.image = self.frames[self.cur_frame]
             self.animation_counter = 0
@@ -158,7 +141,8 @@ class Slime(pygame.sprite.Sprite):
         if not self.die_flag:
             self.game["sound"]("assets/sounds/enemy_hit.mp3")
         self.health -= damage
-        self.get_angry = True
+        if not self.angry:
+            self.get_angry = True
         if self.health <= 0 and not self.die_flag:
             self.die(self.game["hero"])
 

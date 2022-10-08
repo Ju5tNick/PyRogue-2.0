@@ -134,19 +134,46 @@ OTHER_OBJECTS = {
 }
 
 POTIONS = {
-    "potion1": [
-        load_image(IMAGES_BASE_PATH + "objects/potion1.png"),
-        "Зеленое зелье увеличивает здоровье на 5hp Цена: 10 Купить? (Y/N)",
-        10, "health", 5
-    ],
-    "potion2": [
-        load_image(IMAGES_BASE_PATH + "objects/potion2.png"),
-        "Синее зелье увеличивает стамину на 15 единиц Цена: 15 Купить? (Y/N)",
-        15, "stamina", 15
-    ],
-    "potion3": [
-        load_image(IMAGES_BASE_PATH + "objects/potion3.png"),
-        "Красное зелье увеличивает урон твоего меча на 15 единиц Цена: 20 Купить? (Y/N)",
-        20, "damage", 15
-    ],
+    "corn": {
+        "image": load_image(IMAGES_BASE_PATH + "objects/corn.png"),
+        "info": "Сладкая кукурузка увеличт твое здоровье. Цена: 20 Купить? (Y/N)",
+        "cost": 20, 
+        "effect": "health", 
+        "ef_value": 5,
+        "required_lvl": 0
+    },
+    "watermelon": {
+        "image": load_image(IMAGES_BASE_PATH + "objects/watermelon.png"),
+        "info": "Сочный арбуз немного увеличит твой запас выносливости. Цена: 30 Купить? (Y/N)",
+        "cost": 30,
+        "effect": "stamina", 
+        "ef_value": 10,
+        "required_lvl": 0
+    },
+    "small_green_potion": {
+        "image": load_image(IMAGES_BASE_PATH + "objects/potion1.png"),
+        "info": "Зеленое зелье увеличит урон твоего меча на 2 единицы. Цена: 50 Купить? (Y/N)",
+        "cost": 50, 
+        "effect": "damage", 
+        "ef_value": 2,
+        "required_lvl": 7
+    },
+    "small_red_potion": {
+        "image": load_image(IMAGES_BASE_PATH + "objects/potion3.png"),
+        "info": "Красное зелье увеличит твое здоровье на 10hp. Цена: 40 Купить? (Y/N)",
+        "cost": 40, 
+        "effect": "health", 
+        "ef_value": 10,
+        "required_lvl": 7
+    },   
+    "small_blue_potion": {
+        "image": load_image(IMAGES_BASE_PATH + "objects/potion2.png"),
+        "info": "Синее зелье увеличит твою выносливость на 15 единиц. Цена: 30 Купить? (Y/N)",
+        "cost": 30, 
+        "effect": "stamina", 
+        "ef_value": 15,
+        "required_lvl": 7
+    }
 }
+
+DIALOG_BAR = load_image(IMAGES_BASE_PATH + "objects/dialog.png")

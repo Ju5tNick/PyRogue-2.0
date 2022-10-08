@@ -35,13 +35,14 @@ class EnemyClot(pygame.sprite.Sprite):
         self.mask = pygame.mask.from_surface(self.image)
 
         self.direction = []
-        self.speed, self.damage = 6.9, 1
+        self.speed, self.damage = 8, 10
+        self.counter = 0
 
-    def move(self, hero, mainhero, weapons, game):
+    def move(self, hero, mainhero, weapons, game, iterations=1):
         if pygame.sprite.spritecollide(self, weapons, False):
             self.kill()
 
-        if self.direction == []:
+        if self.counter <= iterations:
             move = [self.speed * 2, 0, -self.speed * 2]
             diff_y, diff_x = abs(hero.get_coords()[0] - self.rect.x), abs(hero.get_coords()[1] - self.rect.y)
             del_x, del_y = 0, 0
@@ -60,8 +61,10 @@ class EnemyClot(pygame.sprite.Sprite):
             x = del_x if del_x == 0 else diff_x / del_x
 
             self.direction = [y, x]
+            self.counter += 1
 
         self.rect = self.rect.move(*self.direction)
+
         if pygame.sprite.spritecollide(self, mainhero, False):
             hero.get_damage(self.damage, game)
             self.kill()

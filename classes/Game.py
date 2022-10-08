@@ -42,7 +42,7 @@ class Game:
         pygame.display.set_icon(OTHER_OBJECTS["logo"])
 
         self.is_weapon_active = False
-        self.hero = MainHero([10, 10], 'MainHero', 200, money=200)
+        self.hero = MainHero([10, 10], 'MainHero', 100, money=0)
         self.weapons.add(self.hero.get_weapon())
         self.mainhero.add(self.hero)
         self.nearest_trader = Trader()
@@ -298,7 +298,7 @@ class Game:
                         self.right, self.left = True, False
 
                     if keys[pygame.K_y] and self.is_trader_active and self.is_chosen[0]:
-                        self.nearest_trader.sell(self.hero, self.is_chosen[1], self.sound)
+                        self.nearest_trader.sell(self.hero, self.is_chosen[1], self.sound, self.screen)
 
                     if keys[pygame.K_n] and self.is_trader_active and self.is_chosen[0]:
                         self.is_chosen = [False, ""]
@@ -336,13 +336,17 @@ class Game:
                     if event.type == pygame.MOUSEBUTTONDOWN:
                         for elem in self.shop:
                             if elem.check(event.pos):
-                                self.is_chosen = [True, elem]
-                                self.nearest_trader.say(self.screen, obj=elem)
+                                 #= [True, elem]
+                                self.is_chosen = self.nearest_trader.say(self.screen, obj=elem)
                                 break
                             else:
                                 self.is_chosen = [False, elem]
+                        self.nearest_trader.reset_flag(False)
+                    else:
+                        self.nearest_trader.reset_flag(True)
                 else:
                     self.is_chosen = [False, ""]
+
 
                 if event.type == pygame.MOUSEMOTION and pygame.mouse.get_focused():
 
@@ -391,7 +395,7 @@ class Game:
                     self.enemies = pygame.sprite.Group()
                     self.trader = pygame.sprite.Group()
                     self.clots = pygame.sprite.Group()
-                    for _ in range(randrange(5, 10)):
+                    for _ in range(randrange(10, 21)):
                         params = {
                             "hero": self.hero,
                             "chunk": self.chunk,
@@ -401,7 +405,7 @@ class Game:
                             "music": self.music,
                             "clots": self.clots,
                         }
-                        self.enemies.add(Slime("name", 10, 100, 2, 5, randrange(5, 15), randrange(10, 21), params))
+                        self.enemies.add(Slime("name", 10, 100, 2, 7, randrange(5, 15), randrange(10, 21), params))
                     self.field[cur_y][cur_x] = self.available_tile, self.unavailable_tile, self.other_obj, self.enemies, self.enemy_visions, self.trader, self.clots, self.chunk
                 else:
                     self.available_tile, self.unavailable_tile, self.other_obj, self.enemies, self.enemy_visions, self.trader, self.clots, self.chunk = self.field[cur_y][cur_x]
@@ -424,7 +428,7 @@ class Game:
 
             if not self.is_trader_active:
                 [elem.update() for elem in self.enemy_visions]
-                [clot.move(self.hero, self.mainhero, self.weapons, Game) for clot in self.clots]
+                [clot.move(self.hero, self.mainhero, self.weapons, Game, randrange(1, 7)) for clot in self.clots]
                 [elem.move(self.hero.get_coords(), self.mainhero) for elem in self.enemies]
                 self.available_tile.draw(self.screen)
                 self.unavailable_tile.draw(self.screen)
