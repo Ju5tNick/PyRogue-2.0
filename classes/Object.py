@@ -4,7 +4,7 @@ import pygame
 
 
 class Object(pygame.sprite.Sprite):
-    def __init__(self, image, coords, size, can_move, effect="", info="", cost=0, ef_value=0):
+    def __init__(self, image, coords, size, can_move, effect="", info="", cost=0, ef_value=0, required_lvl=0):
         super().__init__(pygame.sprite.Group())
         self.image, self.coords, self.size, self.info = image, coords, size, info
         self.cost, self.effect = cost, effect
@@ -12,6 +12,7 @@ class Object(pygame.sprite.Sprite):
         self.rect = pygame.Rect(coords[0], coords[1], size[0], size[1])
         self.mask = pygame.mask.from_surface(self.image)
         self.ef_value = ef_value
+        self.required_lvl = required_lvl
 
     def move(self):
         if self.can_move:
@@ -31,6 +32,9 @@ class Object(pygame.sprite.Sprite):
 
     def get_info(self):
         return self.info
+
+    def get_lvl(self):
+        return self.required_lvl
 
     def get_cost(self):
         return self.cost

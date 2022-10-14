@@ -152,7 +152,7 @@ POTIONS = {
     },
     "small_green_potion": {
         "image": load_image(IMAGES_BASE_PATH + "objects/potion1.png"),
-        "info": "Зеленое зелье увеличит урон твоего меча на 2 единицы. Цена: 50 Купить? (Y/N)",
+        "info": "Зеленое зелье увеличит урон твоего меча на 2 единицы. (Нужен 7 уровень) Цена: 50 Купить? (Y/N)",
         "cost": 50, 
         "effect": "damage", 
         "ef_value": 2,
@@ -160,7 +160,7 @@ POTIONS = {
     },
     "small_red_potion": {
         "image": load_image(IMAGES_BASE_PATH + "objects/potion3.png"),
-        "info": "Красное зелье увеличит твое здоровье на 10hp. Цена: 40 Купить? (Y/N)",
+        "info": "Красное зелье увеличит твое здоровье на 10hp. (Нужен 7 уровень) Цена: 40 Купить? (Y/N)",
         "cost": 40, 
         "effect": "health", 
         "ef_value": 10,
@@ -168,12 +168,18 @@ POTIONS = {
     },   
     "small_blue_potion": {
         "image": load_image(IMAGES_BASE_PATH + "objects/potion2.png"),
-        "info": "Синее зелье увеличит твою выносливость на 15 единиц. Цена: 30 Купить? (Y/N)",
+        "info": "Синее зелье увеличит твою выносливость на 15 единиц. (Нужен 7 уровень) Цена: 30 Купить? (Y/N)",
         "cost": 30, 
         "effect": "stamina", 
         "ef_value": 15,
         "required_lvl": 7
     }
+}
+
+MERCHANT_PHRASES = {
+    "no_money": "Маловато у тебя деньжат. Возвращайся, как поднакопишь больше",
+    "dont_selling": "Я продам тебе эту настойку, после того как ты станешь немного опытней",
+    "irritaion": "Не надо на меня тыкать!"
 }
 
 DIALOG_BAR = load_image(IMAGES_BASE_PATH + "objects/dialog.png")

@@ -161,4 +161,3 @@ class MainHero(pygame.sprite.Sprite):
             self.current_stamina -= 5
         elif self.current_stamina < self.stamina:
             self.current_stamina += 1
-

@@ -10,7 +10,7 @@ from classes.Slime import Slime
 from classes.Tile import AvailableTile, UnavailableTile
 from classes.Trader import Trader
 from classes.Weapon import Weapon
-from helpers.config import FIELD_SIZE_Y, FIELD_SIZE_X, TILE_WIDTH, TILES_COUNT_X, TILES_COUNT_Y, TILE_HEIGHT
+from helpers.config import *
 from helpers.images import OTHER_OBJECTS, load_image, POTIONS
 
 
@@ -42,7 +42,7 @@ class Game:
         pygame.display.set_icon(OTHER_OBJECTS["logo"])
 
         self.is_weapon_active = False
-        self.hero = MainHero([10, 10], 'MainHero', 100, money=0)
+        self.hero = MainHero([10, 10], 'MainHero', HERO_HP, money=HERO_MONEY)
         self.weapons.add(self.hero.get_weapon())
         self.mainhero.add(self.hero)
         self.nearest_trader = Trader()
@@ -298,7 +298,7 @@ class Game:
                         self.right, self.left = True, False
 
                     if keys[pygame.K_y] and self.is_trader_active and self.is_chosen[0]:
-                        self.nearest_trader.sell(self.hero, self.is_chosen[1], self.sound, self.screen)
+                        self.nearest_trader.sell(self.hero, self.is_chosen[-1], self.sound, self.screen)
 
                     if keys[pygame.K_n] and self.is_trader_active and self.is_chosen[0]:
                         self.is_chosen = [False, ""]
@@ -336,16 +336,17 @@ class Game:
                     if event.type == pygame.MOUSEBUTTONDOWN:
                         for elem in self.shop:
                             if elem.check(event.pos):
-                                 #= [True, elem]
-                                self.is_chosen = self.nearest_trader.say(self.screen, obj=elem)
+                                self.nearest_trader.set_text(obj=elem)
+                                self.is_chosen = [True, self.nearest_trader.get_text(), elem]
+                                self.nearest_trader.say(self.screen)
                                 break
                             else:
-                                self.is_chosen = [False, elem]
+                                self.is_chosen = [False, self.nearest_trader.get_text(), elem]
                         self.nearest_trader.reset_flag(False)
                     else:
                         self.nearest_trader.reset_flag(True)
                 else:
-                    self.is_chosen = [False, ""]
+                    self.is_chosen = [False, self.nearest_trader.get_text(), None]
 
 
                 if event.type == pygame.MOUSEMOTION and pygame.mouse.get_focused():
@@ -448,7 +449,7 @@ class Game:
             self.draw_interface()
 
             if self.is_chosen[0]:
-                self.nearest_trader.say(self.screen, obj=elem)
+                self.nearest_trader.say(self.screen)
 
             pygame.display.flip()
             self.clock.tick(30)
