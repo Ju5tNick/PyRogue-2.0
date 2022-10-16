@@ -7,6 +7,7 @@ from random import randrange, choice
 from classes.MainHero import MainHero
 from classes.Object import Object
 from classes.Slime import Slime
+from classes.Exp_slime import Exp_slime
 from classes.Tile import AvailableTile, UnavailableTile
 from classes.Trader import Trader
 from helpers.config import *
@@ -408,6 +409,20 @@ class Game:
                             "screen": self.screen,
                         }
                         self.enemies.add(Slime("name", 10, 100, 2, randrange(5, 15), randrange(10, 21), params))
+
+                    for _ in range(randrange(2, 6)):
+                        params = {
+                            "hero": self.hero,
+                            "chunk": self.chunk,
+                            "available_tile": self.available_tile,
+                            "enemy_visions": self.enemy_visions,
+                            "sound": self.sound,
+                            "music": self.music,
+                            "clots": self.clots,
+                            "screen": self.screen,
+                        }
+                        self.enemies.add(Exp_slime("name", 40, 50, 5, randrange(15, 26), randrange(20, 31), params))
+
                     self.field[cur_y][cur_x] = self.available_tile, self.unavailable_tile, self.other_obj, self.enemies, self.enemy_visions, self.trader, self.clots, self.chunk, self.coins
                 else:
                     self.available_tile, self.unavailable_tile, self.other_obj, self.enemies, self.enemy_visions, self.trader, self.clots, self.chunk, self.coins = self.field[cur_y][cur_x]
