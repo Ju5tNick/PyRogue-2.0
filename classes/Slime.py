@@ -3,6 +3,7 @@ import pygame
 from random import randrange, choice
 
 from classes.Enemy import EnemyVision, EnemyClot
+from classes.Coin import Coin
 from helpers.config import TILE_WIDTH, TILE_HEIGHT, TILES_COUNT_Y, TILES_COUNT_X
 from helpers.images import SLIME_SETS
 
@@ -158,7 +159,9 @@ class Slime(pygame.sprite.Sprite):
     def die(self, hero):
         if self.health <= 0:
             self.game["music"]("assets/sounds/death_enemy.mp3")
-            hero.balance += self.gold_drops
+            # hero.balance += self.gold_drops
+            coin = Coin()
+            coin.drop(self.game["screen"])
             hero.xp_progress += self.xp_drops
             hero.check_level()
             self.vision.kill()

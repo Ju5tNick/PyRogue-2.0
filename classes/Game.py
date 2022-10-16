@@ -9,9 +9,8 @@ from classes.Object import Object
 from classes.Slime import Slime
 from classes.Tile import AvailableTile, UnavailableTile
 from classes.Trader import Trader
-from classes.Weapon import Weapon
 from helpers.config import *
-from helpers.images import OTHER_OBJECTS, load_image, POTIONS
+from helpers.images import OTHER_OBJECTS, load_image
 
 
 class Game:
@@ -405,6 +404,7 @@ class Game:
                             "sound": self.sound,
                             "music": self.music,
                             "clots": self.clots,
+                            "screen": self.screen,
                         }
                         self.enemies.add(Slime("name", 10, 100, 2, 7, randrange(5, 15), randrange(10, 21), params))
                     self.field[cur_y][cur_x] = self.available_tile, self.unavailable_tile, self.other_obj, self.enemies, self.enemy_visions, self.trader, self.clots, self.chunk

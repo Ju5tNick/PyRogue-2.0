@@ -1,5 +1,3 @@
-from random import randrange
-
 import pygame
 
 from helpers.images import SLIME_SETS
