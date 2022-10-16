@@ -179,9 +179,9 @@ class Slime(pygame.sprite.Sprite):
             for _ in range((self.gold_drops % 10) // 5):
                 self.coins.append(Coin(self.coords, 5))
 
-            for _ in range((self.gold_drops // 10) % 5):
+            for _ in range((self.gold_drops % 10) % 5):
                 self.coins.append(Coin(self.coords, 1))
-                
+
             self.game["music"]("assets/sounds/death_enemy.mp3")
             hero.xp_progress += self.xp_drops
             hero.check_level()

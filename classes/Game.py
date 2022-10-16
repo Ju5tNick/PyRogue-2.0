@@ -25,7 +25,6 @@ class Game:
     clock = pygame.time.Clock()
 
     enemies = pygame.sprite.Group()
-    f = pygame.sprite.Group()
     enemy_visions = pygame.sprite.Group()
     mainhero = pygame.sprite.Group()
     trader = pygame.sprite.Group()
@@ -260,7 +259,7 @@ class Game:
         available_tile, unavailable_tile = self.render_map(self.chunk)
         available_tile.draw(self.screen)
         unavailable_tile.draw(self.screen)
-        self.field[self.cur_y][self.cur_x] = available_tile, unavailable_tile, self.other_obj, self.enemies, self.enemy_visions, self.trader, self.clots, self.chunk
+        self.field[self.cur_y][self.cur_x] = available_tile, unavailable_tile, self.other_obj, self.enemies, self.enemy_visions, self.trader, self.clots, self.chunk, self.coins
         self.trader.draw(self.screen)
         self.clots.draw(self.screen)
         self.mainhero.draw(self.screen)
@@ -397,6 +396,7 @@ class Game:
                     self.enemies = pygame.sprite.Group()
                     self.trader = pygame.sprite.Group()
                     self.clots = pygame.sprite.Group()
+                    self.coins = pygame.sprite.Group()
                     for _ in range(randrange(10, 21)):
                         params = {
                             "hero": self.hero,
@@ -408,9 +408,9 @@ class Game:
                             "clots": self.clots,
                         }
                         self.enemies.add(Slime("name", 10, 100, 2, randrange(5, 15), randrange(10, 21), params))
-                    self.field[cur_y][cur_x] = self.available_tile, self.unavailable_tile, self.other_obj, self.enemies, self.enemy_visions, self.trader, self.clots, self.chunk
+                    self.field[cur_y][cur_x] = self.available_tile, self.unavailable_tile, self.other_obj, self.enemies, self.enemy_visions, self.trader, self.clots, self.chunk, self.coins
                 else:
-                    self.available_tile, self.unavailable_tile, self.other_obj, self.enemies, self.enemy_visions, self.trader, self.clots, self.chunk = self.field[cur_y][cur_x]
+                    self.available_tile, self.unavailable_tile, self.other_obj, self.enemies, self.enemy_visions, self.trader, self.clots, self.chunk, self.coins = self.field[cur_y][cur_x]
 
             if TILES_COUNT_X * TILE_WIDTH <= self.hero.get_coords()[0]:
                 self.hero.set_coords(1, self.hero.get_coords()[1])
