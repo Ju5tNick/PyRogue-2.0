@@ -152,6 +152,9 @@ class MainHero(pygame.sprite.Sprite):
     def add_stamina(self, value):
         self.stamina += value
 
+    def pay(self, value):
+        self.balance += value
+
     def running(self, flag):
         self.speed = self.speed * 2 if flag and self.current_stamina >= 20 else self.speed
 

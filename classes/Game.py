@@ -33,6 +33,7 @@ class Game:
     clots = pygame.sprite.Group()
     weapons = pygame.sprite.Group()
     background = pygame.sprite.Group()
+    coins = pygame.sprite.Group()
 
     def __init__(self):
         pygame.init()
@@ -406,7 +407,7 @@ class Game:
                             "music": self.music,
                             "clots": self.clots,
                         }
-                        self.enemies.add(Slime("name", 10, 100, 2, 7, randrange(5, 15), randrange(10, 21), params))
+                        self.enemies.add(Slime("name", 10, 100, 2, randrange(5, 15), randrange(10, 21), params))
                     self.field[cur_y][cur_x] = self.available_tile, self.unavailable_tile, self.other_obj, self.enemies, self.enemy_visions, self.trader, self.clots, self.chunk
                 else:
                     self.available_tile, self.unavailable_tile, self.other_obj, self.enemies, self.enemy_visions, self.trader, self.clots, self.chunk = self.field[cur_y][cur_x]
@@ -428,17 +429,21 @@ class Game:
             self.hero.running(self.is_running)
 
             if not self.is_trader_active:
-                [elem.update() for elem in self.enemy_visions]
+                [vision.update(self.screen) for vision in self.enemy_visions]
                 [clot.move(self.hero, self.mainhero, self.weapons, Game, randrange(1, 7)) for clot in self.clots]
-                [elem.move(self.hero.get_coords(), self.mainhero) for elem in self.enemies]
+                [enemy.move(self.hero.get_coords(), self.mainhero) for enemy in self.enemies]
+                [[self.coins.add(coin) for coin in enemy.get_coins()] for enemy in self.enemies]
+                [coin.drop(self.mainhero) for coin in self.coins]
                 self.available_tile.draw(self.screen)
                 self.unavailable_tile.draw(self.screen)
                 self.other_obj.draw(self.screen)
                 self.trader.draw(self.screen)
+                [elem.update(self.screen) for elem in self.enemy_visions]
                 self.enemy_visions.draw(self.screen)
                 self.enemies.draw(self.screen)
                 self.clots.draw(self.screen)
-                pygame.draw.circle(self.screen, (70, 79, 21), (self.hero.get_coords()[0] + 19 / 2, self.hero.get_coords()[1] + 31 / 2),
+                self.coins.draw(self.screen)
+                pygame.draw.circle(self.screen, (101, 101, 101), (self.hero.get_coords()[0] + 19 / 2, self.hero.get_coords()[1] + 31 / 2),
                                    self.hero.get_range(), 1)
                 self.mainhero.draw(self.screen)
                 if self.is_weapon_active:

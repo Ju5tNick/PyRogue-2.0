@@ -11,11 +11,11 @@ class EnemyVision(pygame.sprite.Sprite):
         super().__init__(pygame.sprite.Group())
         self.host, self.range = enemy, range
         self.image = pygame.Surface((3 * self.range, 3 * self.range), pygame.SRCALPHA, 32)
-        pygame.draw.circle(self.image, (70, 79, 21), (self.range, self.range), self.range, 1)
         pygame.draw.rect(self.image, (255, 0, 0), (self.range - 10, self.range - 16, 22, 5))
         self.rect = pygame.Rect(coords[0] - self.range + 10.5, coords[1] - self.range + 12, 1.85 * self.range, 1.85 * self.range)
+        self.is_noticed = False
 
-    def update(self):
+    def update(self, screen):
         pygame.draw.rect(self.image, (0, 0, 0), (self.range - 10, self.range - 16, 22, 5))
         pygame.draw.rect(self.image, (255, 0, 0), (self.range - 9, self.range - 15, (self.host.get_health() / self.host.get_max_health() * 22 - 2), 3))
 
@@ -24,6 +24,9 @@ class EnemyVision(pygame.sprite.Sprite):
 
     def check(self, mainhero):
         return pygame.sprite.spritecollideany(self, mainhero)
+
+    def set_flag(self):
+        self.is_noticed = True
 
 
 class EnemyClot(pygame.sprite.Sprite):
