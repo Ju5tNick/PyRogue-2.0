@@ -1,5 +1,4 @@
 import pygame
-from random import randint
 
 from helpers.config import TILE_WIDTH, TILE_HEIGHT, TILES_COUNT_X, TILES_COUNT_Y
 from helpers.images import TRADER_SETS, POTIONS, MERCHANT_PHRASES

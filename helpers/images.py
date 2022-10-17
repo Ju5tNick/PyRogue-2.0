@@ -36,6 +36,54 @@ WEAPON_SETS = {
     "sword": load_image(IMAGES_BASE_PATH + "weapons/sword.png"),
 }
 
+EXP_SLIME_SETS = {
+    "still": [
+        load_image(IMAGES_BASE_PATH + "enemies/exp_slime/static/0.png"),
+        load_image(IMAGES_BASE_PATH + "enemies/exp_slime/static/1.png"),
+        load_image(IMAGES_BASE_PATH + "enemies/exp_slime/static/2.png"),
+        load_image(IMAGES_BASE_PATH + "enemies/exp_slime/static/3.png"),
+        load_image(IMAGES_BASE_PATH + "enemies/exp_slime/static/4.png"),
+        load_image(IMAGES_BASE_PATH + "enemies/exp_slime/static/5.png"),
+        load_image(IMAGES_BASE_PATH + "enemies/exp_slime/static/6.png"),
+    ],
+
+    "move": [
+        load_image(IMAGES_BASE_PATH + "enemies/exp_slime/move/0.png"),
+        load_image(IMAGES_BASE_PATH + "enemies/exp_slime/move/1.png"),
+        load_image(IMAGES_BASE_PATH + "enemies/exp_slime/move/2.png"),
+        load_image(IMAGES_BASE_PATH + "enemies/exp_slime/move/3.png"),
+        load_image(IMAGES_BASE_PATH + "enemies/exp_slime/move/4.png"),
+        load_image(IMAGES_BASE_PATH + "enemies/exp_slime/move/5.png"),
+        load_image(IMAGES_BASE_PATH + "enemies/exp_slime/move/6.png"),
+        load_image(IMAGES_BASE_PATH + "enemies/exp_slime/move/7.png"),
+    ],
+
+    "angry_move": [
+        load_image(IMAGES_BASE_PATH + "enemies/exp_slime/angry_move/0.png"),
+        load_image(IMAGES_BASE_PATH + "enemies/exp_slime/angry_move/1.png"),
+    ],
+
+    "gets_angry": [
+        load_image(IMAGES_BASE_PATH + "enemies/exp_slime/gets_angry/0.png"),
+        load_image(IMAGES_BASE_PATH + "enemies/exp_slime/gets_angry/1.png"),
+        load_image(IMAGES_BASE_PATH + "enemies/exp_slime/gets_angry/2.png"),
+        load_image(IMAGES_BASE_PATH + "enemies/exp_slime/gets_angry/3.png"),
+        load_image(IMAGES_BASE_PATH + "enemies/exp_slime/gets_angry/4.png"),
+    ],
+
+    "explosive": [
+        load_image(IMAGES_BASE_PATH + "enemies/exp_slime/explosive/0.png"),
+        load_image(IMAGES_BASE_PATH + "enemies/exp_slime/explosive/1.png"),
+        load_image(IMAGES_BASE_PATH + "enemies/exp_slime/explosive/2.png"),
+        load_image(IMAGES_BASE_PATH + "enemies/exp_slime/explosive/3.png"),
+        load_image(IMAGES_BASE_PATH + "enemies/exp_slime/explosive/4.png"),
+        load_image(IMAGES_BASE_PATH + "enemies/exp_slime/explosive/5.png"),
+    ],
+
+    "image": load_image(IMAGES_BASE_PATH + "enemies/exp_slime/static/0.png"),
+}
+    
+
 SLIME_SETS = {
     "still": [
         load_image(IMAGES_BASE_PATH + "enemies/slime/static/0.png"),
@@ -144,8 +192,8 @@ POTIONS = {
     },
     "watermelon": {
         "image": load_image(IMAGES_BASE_PATH + "objects/watermelon.png"),
-        "info": "Сочный арбуз немного увеличит твой запас выносливости. Цена: 30 Купить? (Y/N)",
-        "cost": 30,
+        "info": "Сочный арбуз немного увеличит твой запас выносливости. Цена: 15 Купить? (Y/N)",
+        "cost": 15,
         "effect": "stamina", 
         "ef_value": 10,
         "required_lvl": 0
@@ -174,6 +222,14 @@ POTIONS = {
         "ef_value": 15,
         "required_lvl": 7
     }
+}
+
+COINS = {
+
+    1: load_image(IMAGES_BASE_PATH + "coins/1.png"),
+    5: load_image(IMAGES_BASE_PATH + "coins/5.png"),
+    10: load_image(IMAGES_BASE_PATH + "coins/10.png")
+
 }
 
 MERCHANT_PHRASES = {

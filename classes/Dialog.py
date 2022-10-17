@@ -1,7 +1,6 @@
 import pygame
 import time
 from helpers.images import DIALOG_BAR
-from helpers.config import *
 
 
 class Dialog(pygame.sprite.Sprite):

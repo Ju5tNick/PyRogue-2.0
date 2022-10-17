@@ -1,15 +1,20 @@
 import pygame
 
-from helpers.images import OTHER_OBJECTS
+from random import randrange
+from helpers.images import COINS
 
 
 class Coin(pygame.sprite.Sprite):
-    image = OTHER_OBJECTS["coin"]
 
-    def __init__(self):
+    def __init__(self, coords, denomination):
         super().__init__(pygame.sprite.Group())
-        self.rect = pygame.Rect(20, 20, 20, 20)
+        self.rect = pygame.Rect(coords[0] + randrange(-5, 6), coords[1] + randrange(-10, 11), 7, 9)
+        self.denomination = denomination
+        self.image = COINS[self.denomination]
         self.mask = pygame.mask.from_surface(self.image)
 
-    def drop(self, screen):
-        screen.blit(self.image, (self.rect.x, self.rect.y))
+    def drop(self, mainhero):
+        if pygame.sprite.spritecollideany(self, mainhero):
+            for hero in mainhero:
+                hero.pay(self.denomination)
+            self.kill()
