@@ -72,7 +72,8 @@ class Game:
                 if chunk[rrow][rcol] in range(6):
                     tile = AvailableTile(f"assets/images/tiles/grass/grass{chunk[rrow][rcol] + 1}.png", rcol, rrow)
                 elif chunk[rrow][rcol] in range(6, 9):
-                    tile, flag = UnavailableTile(f"assets/images/tiles/water/water3{chunk[rrow][rcol] - 5}.png", rcol, rrow), True
+                    tile, flag = UnavailableTile(f"assets/images/tiles/water/water3{chunk[rrow][rcol] - 5}.png", rcol,
+                                                 rrow), True
                 elif chunk[rrow][rcol] in range(9, 12):
                     tile = AvailableTile(f"assets/images/tiles/sand/sand{chunk[rrow][rcol] - 8}.png", rcol, rrow)
 
@@ -129,7 +130,8 @@ class Game:
         if choice([True, False, False]):
             for i in range(TILES_COUNT_Y):
                 for j in range(TILES_COUNT_X):
-                    if i < TILES_COUNT_Y - 1 and chunk[i][j] in list(range(6)) + list(range(9, 12)) and chunk[i + 1][j] in list(
+                    if i < TILES_COUNT_Y - 1 and chunk[i][j] in list(range(6)) + list(range(9, 12)) and chunk[i + 1][
+                        j] in list(
                             range(6, 9)):
                         chunk[i][j] = randrange(9, 12)
                         chunk[i - 1][j] = randrange(9, 12) if i < TILES_COUNT_Y - 2 else 1
@@ -144,7 +146,8 @@ class Game:
                         chunk[i][j - 1] = randrange(9, 12) if j - 2 > 0 else 1
                         flag = True
 
-                    if j < TILES_COUNT_X - 1 and chunk[i][j] in list(range(6)) + list(range(9, 12)) and chunk[i][j + 1] in list(
+                    if j < TILES_COUNT_X - 1 and chunk[i][j] in list(range(6)) + list(range(9, 12)) and chunk[i][
+                        j + 1] in list(
                             range(6, 9)):
                         chunk[i][j] = randrange(9, 12)
                         chunk[i][j - 1] = randrange(9, 12) if j < TILES_COUNT_X - 2 else 1
@@ -155,11 +158,13 @@ class Game:
                         chunk[i][j] = randrange(9, 12)
                         chunk[i][j + 1] = randrange(9, 12) if j - 2 > 0 else 1
 
-                    if i < TILES_COUNT_Y - 2 and j < TILES_COUNT_X - 2 and chunk[i][j] in list(range(6, 9)) and chunk[i + 1][j + 1] in list(
+                    if i < TILES_COUNT_Y - 2 and j < TILES_COUNT_X - 2 and chunk[i][j] in list(range(6, 9)) and \
+                            chunk[i + 1][j + 1] in list(
                             range(6)):
                         chunk[i + 1][j + 1] = randrange(9, 12)
                         flag = True
-                    if i - 2 != 0 and j < TILES_COUNT_X - 2 and chunk[i][j] in list(range(6, 9)) and chunk[i - 1][j + 1] in list(
+                    if i - 2 != 0 and j < TILES_COUNT_X - 2 and chunk[i][j] in list(range(6, 9)) and chunk[i - 1][
+                        j + 1] in list(
                             range(6)):
                         chunk[i - 1][j + 1] = randrange(9, 12)
                         flag = True
@@ -183,28 +188,34 @@ class Game:
         # hp_bar
         pygame.draw.rect(self.screen, (0, 0, 0), (TILES_COUNT_X * TILE_WIDTH - 195, 5, 190, 17))
         pygame.draw.rect(self.screen, (255, 0, 0),
-                         (TILES_COUNT_X * TILE_WIDTH - 194, 6, (self.hero.get_hp() / self.hero.get_max_hp() * 190 - 2), 15))
+                         (TILES_COUNT_X * TILE_WIDTH - 194, 6, (self.hero.get_hp() / self.hero.get_max_hp() * 190 - 2),
+                          15))
 
-        self.screen.blit(pygame.font.Font(None, 21).render(str(self.hero.get_hp()).rjust(3, '0'), True, (255, 255, 255)),
-                    (TILES_COUNT_X * TILE_WIDTH - 100, 7))
+        self.screen.blit(
+            pygame.font.Font(None, 21).render(str(self.hero.get_hp()).rjust(3, '0'), True, (255, 255, 255)),
+            (TILES_COUNT_X * TILE_WIDTH - 100, 7))
         self.screen.blit(OTHER_OBJECTS["heart"], (TILES_COUNT_X * TILE_WIDTH - 115, 6))
 
         # experience_bar
         pygame.draw.rect(self.screen, (0, 0, 0), (TILES_COUNT_X * TILE_WIDTH - 95, 24, 90, 17))
         pygame.draw.rect(self.screen, (255, 255, 255),
-                         (TILES_COUNT_X * TILE_WIDTH - 94, 25, (self.hero.get_ex()[0] / self.hero.get_ex()[1] * 90 - 1), 15))
+                         (TILES_COUNT_X * TILE_WIDTH - 94, 25, (self.hero.get_ex()[0] / self.hero.get_ex()[1] * 90 - 1),
+                          15))
         self.screen.blit(
-            pygame.font.Font(None, 14).render(f"lvl: {self.hero.get_ex()[-1]} exp: {self.hero.get_ex()[0]} / {self.hero.get_ex()[1]}",
-                                              True, (120, 120, 120)), (TILES_COUNT_X * TILE_WIDTH - 90, 28))
+            pygame.font.Font(None, 14).render(
+                f"lvl: {self.hero.get_ex()[-1]} exp: {self.hero.get_ex()[0]} / {self.hero.get_ex()[1]}",
+                True, (120, 120, 120)), (TILES_COUNT_X * TILE_WIDTH - 90, 28))
         # money_bar
-        self.screen.blit(pygame.font.Font(None, 25).render(str(self.hero.get_balance()).rjust(5, '0'), True, (254, 226, 66)),
-                    (TILES_COUNT_X * TILE_WIDTH - 70, 44))
+        self.screen.blit(
+            pygame.font.Font(None, 25).render(str(self.hero.get_balance()).rjust(5, '0'), True, (254, 226, 66)),
+            (TILES_COUNT_X * TILE_WIDTH - 70, 44))
         self.screen.blit(OTHER_OBJECTS["coin"], (TILES_COUNT_X * TILE_WIDTH - 21, 42))
 
         # stamina
         pygame.draw.rect(self.screen, (0, 0, 0), (TILES_COUNT_X * TILE_WIDTH - 195, 24, 95, 17))
-        pygame.draw.rect(self.screen, (64, 105, 194), (TILES_COUNT_X * TILE_WIDTH - 194, 25, (self.hero.get_stamina()[1] 
-                        / self.hero.get_stamina()[0] * 95 - 2), 15))
+        pygame.draw.rect(self.screen, (64, 105, 194), (TILES_COUNT_X * TILE_WIDTH - 194, 25, (self.hero.get_stamina()[1]
+                                                                                              / self.hero.get_stamina()[
+                                                                                                  0] * 95 - 2), 15))
 
     @staticmethod
     def terminate():
@@ -213,18 +224,74 @@ class Game:
 
     def start_screen(self):
         image, running = OTHER_OBJECTS["begin"], True
+        self.music("assets/sounds/start_menu.mp3", repeat=-1)
+
+        done, alpha = False, 0
+        while not done:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    done = True
+            if alpha < 255:
+                alpha += 2
+                alpha = min(255, alpha)
+                surf = self.change_alpha(image, alpha)
+            # if alpha > 0:
+            #     # Reduce alpha each frame.
+            #     alpha -= 4
+            #     alpha = max(0, alpha)  # Make sure it doesn't go below 0.
+            #     surf = self.change_alpha(image, alpha)
+            else:
+                done = True
+
+            self.screen.fill((30, 30, 30))
+            self.screen.blit(surf, (0, 0))
+            pygame.display.flip()
+            self.clock.tick(30)
+
         while running:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.terminate()
+
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if 772 <= event.pos[0] <= 832 and 249 <= event.pos[1] <= 271:
                         running = False
-
                     if 787 <= event.pos[0] <= 832 and 276 <= event.pos[1] <= 293:
                         self.terminate()
+
                 self.screen.blit(image, (0, 0))
                 pygame.display.flip()
+
+        done, alpha = False, 255
+        while not done:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    done = True
+            # if alpha < 255:
+            #     alpha += 2
+            #     alpha = min(255, alpha)
+            #     surf = self.change_alpha(image, alpha)
+            if alpha > 0:
+                alpha -= 2
+                alpha = max(0, alpha)
+                surf = self.change_alpha(image, alpha)
+            else:
+                done = True
+
+            self.screen.fill((30, 30, 30))
+            self.screen.blit(surf, (0, 0))
+            pygame.display.flip()
+            self.clock.tick(30)
+
+        self.pause_music()
+
+    @staticmethod
+    def change_alpha(orig_surf, alpha):
+        surf = orig_surf.copy()
+        alpha_surf = pygame.Surface(surf.get_size(), pygame.SRCALPHA)
+        alpha_surf.fill((255, 255, 255, alpha))
+        surf.blit(alpha_surf, (0, 0), special_flags=pygame.BLEND_RGBA_MULT)
+        return surf
 
     def game_over(self):
         self.is_first_session = False
@@ -241,10 +308,14 @@ class Game:
                 pygame.display.flip()
 
     @staticmethod
-    def music(filename):
+    def music(filename, volume=0.5, repeat=1):
         pygame.mixer.music.load(filename)
-        pygame.mixer.music.set_volume(0.5)
-        pygame.mixer.music.play()
+        pygame.mixer.music.set_volume(volume)
+        pygame.mixer.music.play(repeat)
+
+    @staticmethod
+    def pause_music():
+        pygame.mixer.music.pause()
 
     @staticmethod
     def sound(filename):
@@ -258,7 +329,8 @@ class Game:
         available_tile, unavailable_tile = self.render_map(self.chunk)
         available_tile.draw(self.screen)
         unavailable_tile.draw(self.screen)
-        self.field[self.cur_y][self.cur_x] = available_tile, unavailable_tile, self.other_obj, self.enemies, self.enemy_visions, self.trader, self.clots, self.chunk
+        self.field[self.cur_y][
+            self.cur_x] = available_tile, unavailable_tile, self.other_obj, self.enemies, self.enemy_visions, self.trader, self.clots, self.chunk
         self.trader.draw(self.screen)
         self.clots.draw(self.screen)
         self.mainhero.draw(self.screen)
@@ -288,12 +360,16 @@ class Game:
                         self.up = self.down = self.right = self.left = False
 
                     if keys[pygame.K_w] and not self.is_trader_active:
+                        self.music("assets/sounds/step.wav", volume=0.2, repeat=-1)
                         self.up, self.down = True, False
                     if keys[pygame.K_a] and not self.is_trader_active:
+                        self.music("assets/sounds/step.wav", volume=0.2, repeat=-1)
                         self.left, self.right = True, False
                     if keys[pygame.K_s] and not self.is_trader_active:
+                        self.music("assets/sounds/step.wav", volume=0.2, repeat=-1)
                         self.down, self.up = True, False
                     if keys[pygame.K_d] and not self.is_trader_active:
+                        self.music("assets/sounds/step.wav", volume=0.2, repeat=-1)
                         self.right, self.left = True, False
 
                     if keys[pygame.K_y] and self.is_trader_active and self.is_chosen[0]:
@@ -303,14 +379,15 @@ class Game:
                         self.is_chosen = [False, ""]
 
                     if self.hero.get_stamina()[1] <= 20:
-                        
-                        self.is_running = False                        
+                        self.pause_music()
+                        self.is_running = False
 
                     else:
-                        if (keys[pygame.K_LSHIFT] and not self.is_trader_active and 
-                            (self.up or self.down or self.left or self.right)):
+                        if (keys[pygame.K_LSHIFT] and not self.is_trader_active and
+                                (self.up or self.down or self.left or self.right)):
+                            self.pause_music()
+                            self.music("assets/sounds/run.wav", volume=0.2, repeat=-1)
                             self.is_running = True
-
 
                 if event.type == pygame.KEYUP and not self.is_trader_active:
                     if keys[pygame.K_LSHIFT]:
@@ -319,15 +396,19 @@ class Game:
                     if keys[pygame.K_w]:
                         self.up = False
                         self.hero.move(self.chunk, "up", stop=True)
+                        self.pause_music()
                     if keys[pygame.K_a]:
                         self.left = False
                         self.hero.move(self.chunk, "left", stop=True)
+                        self.pause_music()
                     if keys[pygame.K_s]:
                         self.down = False
                         self.hero.move(self.chunk, "down", stop=True)
+                        self.pause_music()
                     if keys[pygame.K_d]:
                         self.right = False
                         self.hero.move(self.chunk, "right", stop=True)
+                        self.pause_music()
 
                 if self.is_trader_active and self.nearest_trader.check(self.mainhero):
                     self.nearest_trader.draw_interface(Game)
@@ -347,7 +428,6 @@ class Game:
                 else:
                     self.is_chosen = [False, self.nearest_trader.get_text(), None]
 
-
                 if event.type == pygame.MOUSEMOTION and pygame.mouse.get_focused():
 
                     if self.hero.check(event.pos) and not self.is_trader_active:
@@ -359,7 +439,8 @@ class Game:
 
                     if self.is_weapon_active:
                         for elem in self.weapons:
-                            self.is_weapon_active = elem.move(*event.pos, *event.rel, self.hero, self.enemies, self.is_weapon_active)
+                            self.is_weapon_active = elem.move(*event.pos, *event.rel, self.hero, self.enemies,
+                                                              self.is_weapon_active)
 
             if self.up:
                 self.hero.move(self.chunk, "up")
@@ -407,9 +488,11 @@ class Game:
                             "screen": self.screen,
                         }
                         self.enemies.add(Slime("name", 10, 100, 2, 7, randrange(5, 15), randrange(10, 21), params))
-                    self.field[cur_y][cur_x] = self.available_tile, self.unavailable_tile, self.other_obj, self.enemies, self.enemy_visions, self.trader, self.clots, self.chunk
+                    self.field[cur_y][
+                        cur_x] = self.available_tile, self.unavailable_tile, self.other_obj, self.enemies, self.enemy_visions, self.trader, self.clots, self.chunk
                 else:
-                    self.available_tile, self.unavailable_tile, self.other_obj, self.enemies, self.enemy_visions, self.trader, self.clots, self.chunk = self.field[cur_y][cur_x]
+                    self.available_tile, self.unavailable_tile, self.other_obj, self.enemies, self.enemy_visions, self.trader, self.clots, self.chunk = \
+                    self.field[cur_y][cur_x]
 
             if TILES_COUNT_X * TILE_WIDTH <= self.hero.get_coords()[0]:
                 self.hero.set_coords(1, self.hero.get_coords()[1])
@@ -438,7 +521,8 @@ class Game:
                 self.enemy_visions.draw(self.screen)
                 self.enemies.draw(self.screen)
                 self.clots.draw(self.screen)
-                pygame.draw.circle(self.screen, (70, 79, 21), (self.hero.get_coords()[0] + 19 / 2, self.hero.get_coords()[1] + 31 / 2),
+                pygame.draw.circle(self.screen, (70, 79, 21),
+                                   (self.hero.get_coords()[0] + 19 / 2, self.hero.get_coords()[1] + 31 / 2),
                                    self.hero.get_range(), 1)
                 self.mainhero.draw(self.screen)
                 if self.is_weapon_active:
