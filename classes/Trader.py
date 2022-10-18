@@ -1,9 +1,11 @@
 import pygame
 
+from classes.Sound import Sound
 from helpers.config import TILE_WIDTH, TILE_HEIGHT, TILES_COUNT_X, TILES_COUNT_Y
 from helpers.images import TRADER_SETS, POTIONS, MERCHANT_PHRASES
 from classes.Object import Object
 from classes.Dialog import Dialog
+from helpers.sounds import SOUNDS
 
 
 class Trader(pygame.sprite.Sprite):
@@ -34,11 +36,11 @@ class Trader(pygame.sprite.Sprite):
                     required_lvl=POTIONS[potion]["required_lvl"]
                     ))
 
-    def sell(self, mainhero, obj, sound, screen):
+    def sell(self, mainhero, obj):
         effects = {"damage": mainhero.add_damage, "stamina": mainhero.add_stamina, "health": mainhero.add_hp}
         if (mainhero.get_balance() - obj.get_cost() >= 0 and obj.get_cost() != 0 and 
             mainhero.get_ex()[2] >= obj.get_lvl()):
-            sound("assets/sounds/buy.wav")
+            Sound.play(SOUNDS["TRADER"]["buy-item"])
             effects[obj.get_effect()](obj.get_ef_value())
             mainhero.buy(obj.get_cost())
 

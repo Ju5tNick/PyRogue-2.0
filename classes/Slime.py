@@ -7,6 +7,7 @@ from classes.Coin import Coin
 from classes.Sound import Sound
 from helpers.config import TILE_WIDTH, TILE_HEIGHT, TILES_COUNT_Y, TILES_COUNT_X
 from helpers.images import SLIME_SETS
+from helpers.sounds import SOUNDS
 
 
 class Slime(pygame.sprite.Sprite):
@@ -111,7 +112,7 @@ class Slime(pygame.sprite.Sprite):
                     self.frames, self.can_move, self.required_quantity = self.slime_sets["gets_angry"], False, 7
 
                     if self.cur_frame == 3:
-                        Sound.sound("assets/sounds/get_angry_e.wav")
+                        Sound.play(SOUNDS["ENEMY"]["get-angry"])
                         self.angry, self.get_angry, self.required_quantity = True, False, 5
 
                 elif self.angry and not self.get_angry:
@@ -150,7 +151,7 @@ class Slime(pygame.sprite.Sprite):
 
     def get_damage(self, damage):
         if not self.die_flag:
-            Sound.sound("assets/sounds/enemy_hit.mp3")
+            Sound.play(SOUNDS["ENEMY"]["hit"])
         self.health -= damage
         if not self.angry:
             self.get_angry = True
@@ -183,7 +184,7 @@ class Slime(pygame.sprite.Sprite):
             for _ in range((self.gold_drops % 10) % 5):
                 self.coins.append(Coin(self.coords, 1))
 
-            Sound.music("assets/sounds/death_enemy.mp3")
+            Sound.play(SOUNDS["ENEMY"]["death"])
             hero.xp_progress += self.xp_drops
             hero.check_level()
             self.vision.kill()

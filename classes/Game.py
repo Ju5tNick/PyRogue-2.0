@@ -14,6 +14,7 @@ from classes.Tile import AvailableTile, UnavailableTile
 from classes.Trader import Trader
 from helpers.config import *
 from helpers.images import OTHER_OBJECTS, load_image
+from helpers.sounds import SOUNDS
 
 
 class Game:
@@ -260,7 +261,7 @@ class Game:
 
     def start_screen(self):
         image, running = OTHER_OBJECTS["begin"], True
-        Sound.music("assets/sounds/start_menu.mp3", repeat=-1)
+        Sound.play(SOUNDS["SOUNDTRACKS"]["start-menu"])
 
         Image.grow(self.screen, self.clock, image)
 
@@ -285,7 +286,7 @@ class Game:
         self.is_first_session = False
         image, running = OTHER_OBJECTS["game_over"], True
         time.sleep(0.1)
-        Sound.music("assets/sounds/game_over.mp3")
+        Sound.play(SOUNDS["GAME"]["game-over"])
         while running:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -335,38 +336,37 @@ class Game:
                     keys = pygame.key.get_pressed()
                     if keys[pygame.K_m] and self.nearest_trader.check(self.mainhero):
                         self.is_trader_active = False if self.is_trader_active else True
-                        if self.is_trader_active:
-                            Sound.music("assets/sounds/morshu.wav")
+                        # if self.is_trader_active:
+                        #     Sound.music("assets/sounds/morshu.wav")
                         self.up = self.down = self.right = self.left = False
 
                     if keys[pygame.K_w] and not self.is_trader_active:
-                        Sound.sound("assets/sounds/step.wav", volume=0.1, repeat=-1)
+                        Sound.play(SOUNDS["HERO"]["step"])
                         self.up, self.down = True, False
                     if keys[pygame.K_a] and not self.is_trader_active:
-                        Sound.sound("assets/sounds/step.wav", volume=0.1, repeat=-1)
+                        Sound.play(SOUNDS["HERO"]["step"])
                         self.left, self.right = True, False
                     if keys[pygame.K_s] and not self.is_trader_active:
-                        Sound.sound("assets/sounds/step.wav", volume=0.1, repeat=-1)
+                        Sound.play(SOUNDS["HERO"]["step"])
                         self.down, self.up = True, False
                     if keys[pygame.K_d] and not self.is_trader_active:
-                        Sound.sound("assets/sounds/step.wav", volume=0.1, repeat=-1)
+                        Sound.play(SOUNDS["HERO"]["step"])
                         self.right, self.left = True, False
 
                     if keys[pygame.K_y] and self.is_trader_active and self.is_chosen[0]:
-                        self.nearest_trader.sell(self.hero, self.is_chosen[-1], Sound.sound, self.screen)
+                        self.nearest_trader.sell(self.hero, self.is_chosen[-1])
 
                     if keys[pygame.K_n] and self.is_trader_active and self.is_chosen[0]:
                         self.is_chosen = [False, ""]
 
                     if self.hero.get_stamina()[1] <= 20:
-                        Sound.pause_music()
+                        Sound.pause("movement")
                         self.is_running = False
 
                     else:
                         if (keys[pygame.K_LSHIFT] and not self.is_trader_active and
                                 (self.up or self.down or self.left or self.right)):
-                            Sound.pause_music()
-                            Sound.sound("assets/sounds/run.wav", volume=0.1, repeat=-1)
+                            Sound.play(SOUNDS["HERO"]["run"])
                             self.is_running = True
 
                 if event.type == pygame.KEYUP and not self.is_trader_active:
@@ -376,19 +376,19 @@ class Game:
                     if keys[pygame.K_w]:
                         self.up = False
                         self.hero.move(self.chunk, "up", stop=True)
-                        Sound.pause_music()
+                        Sound.pause("movement")
                     if keys[pygame.K_a]:
                         self.left = False
                         self.hero.move(self.chunk, "left", stop=True)
-                        Sound.pause_music()
+                        Sound.pause("movement")
                     if keys[pygame.K_s]:
                         self.down = False
                         self.hero.move(self.chunk, "down", stop=True)
-                        Sound.pause_music()
+                        Sound.pause("movement")
                     if keys[pygame.K_d]:
                         self.right = False
                         self.hero.move(self.chunk, "right", stop=True)
-                        Sound.pause_music()
+                        Sound.pause("movement")
 
                 if self.is_trader_active and self.nearest_trader.check(self.mainhero):
                     self.nearest_trader.draw_interface(Game)

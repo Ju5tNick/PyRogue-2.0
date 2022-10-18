@@ -4,6 +4,7 @@ from classes.Sound import Sound
 from classes.Weapon import Weapon
 from helpers.config import TILE_WIDTH, TILE_HEIGHT, TILES_COUNT_Y, TILES_COUNT_X
 from helpers.images import HERO_SETS
+from helpers.sounds import SOUNDS
 
 
 class MainHero(pygame.sprite.Sprite):
@@ -78,10 +79,10 @@ class MainHero(pygame.sprite.Sprite):
         return self.max_hp
 
     def get_damage(self, damage, game):
-        Sound.sound("assets/sounds/mh_hit.mp3")
+        Sound.play(SOUNDS["HERO"]["hit"])
         self.hp -= damage
         if self.hp <= 0:
-            Sound.sound("assets/sounds/death_mh.mp3")
+            Sound.play(SOUNDS["HERO"]["death"])
             game.game_over(game)
 
     def add_hp(self, hp):
