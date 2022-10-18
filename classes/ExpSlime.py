@@ -1,3 +1,4 @@
+from classes.Sound import Sound
 from helpers.config import TILE_WIDTH, TILE_HEIGHT, TILES_COUNT_Y, TILES_COUNT_X
 from classes.Slime import Slime
 from helpers.images import EXP_SLIME_SETS
@@ -91,7 +92,7 @@ class ExpSlime(Slime):
                     self.frames, self.can_move, self.required_quantity = self.slime_sets["gets_angry"], False, 7
 
                     if self.cur_frame == 3:
-                        self.game["sound"]("assets/sounds/get_angry_e.wav")
+                        Sound.sound("assets/sounds/get_angry_e.wav")
                         self.angry, self.get_angry, self.required_quantity = True, False, 5
 
                 elif self.angry and not self.get_angry:

@@ -9,6 +9,7 @@ from classes.MainHero import MainHero
 from classes.Object import Object
 from classes.Slime import Slime
 from classes.ExpSlime import ExpSlime
+from classes.Sound import Sound
 from classes.Tile import AvailableTile, UnavailableTile
 from classes.Trader import Trader
 from helpers.config import *
@@ -48,7 +49,7 @@ class Game:
         self.mainhero.add(self.hero)
         self.nearest_trader = Trader()
         self.trader.add(self.nearest_trader)
-        self.up = self.down = self.left = self.right = False
+        self.up = self.down = self.left = self.right = self.is_running = False
 
         self.background.add(Object(
             OTHER_OBJECTS["background"][0], [0, 0], [TILES_COUNT_X * TILE_WIDTH, TILES_COUNT_Y * TILE_HEIGHT],
@@ -219,6 +220,39 @@ class Game:
                                                                                               / self.hero.get_stamina()[
                                                                                                   0] * 95 - 2), 15))
 
+    def draw_sprites(self, auto_update=True):
+        if not self.is_trader_active:
+            [vision.update(self.screen) for vision in self.enemy_visions]
+            [clot.move(self.hero, self.mainhero, self.weapons, Game, randrange(1, 7)) for clot in self.clots]
+            [enemy.move(self.hero.get_coords(), self.mainhero) for enemy in self.enemies]
+            [[self.coins.add(coin) for coin in enemy.get_coins()] for enemy in self.enemies]
+            [coin.drop(self.mainhero) for coin in self.coins]
+            self.available_tile.draw(self.screen)
+            self.unavailable_tile.draw(self.screen)
+            self.other_obj.draw(self.screen)
+            self.trader.draw(self.screen)
+            [elem.update(self.screen) for elem in self.enemy_visions]
+            self.enemy_visions.draw(self.screen)
+            self.enemies.draw(self.screen)
+            self.clots.draw(self.screen)
+            self.coins.draw(self.screen)
+            pygame.draw.circle(self.screen, (101, 101, 101),
+                               (self.hero.get_coords()[0] + 19 / 2, self.hero.get_coords()[1] + 31 / 2),
+                               self.hero.get_range(), 1)
+            self.mainhero.draw(self.screen)
+            if self.is_weapon_active:
+                self.weapons.draw(self.screen)
+        else:
+            self.nearest_trader.draw_interface(Game)
+
+        self.draw_interface()
+
+        if self.is_chosen[0]:
+            self.nearest_trader.say(self.screen)
+
+        if auto_update:
+            pygame.display.flip()
+
     @staticmethod
     def terminate():
         pygame.quit()
@@ -226,7 +260,7 @@ class Game:
 
     def start_screen(self):
         image, running = OTHER_OBJECTS["begin"], True
-        self.music("assets/sounds/start_menu.mp3", repeat=-1)
+        Sound.music("assets/sounds/start_menu.mp3", repeat=-1)
 
         Image.grow(self.screen, self.clock, image)
 
@@ -244,42 +278,30 @@ class Game:
                 self.screen.blit(image, (0, 0))
                 pygame.display.flip()
 
+        Sound.pause_music(3000)
         Image.fade(self.screen, self.clock, image)
-        self.pause_music()
 
     def game_over(self):
         self.is_first_session = False
         image, running = OTHER_OBJECTS["game_over"], True
         time.sleep(0.1)
-        self.music("assets/sounds/game_over.mp3")
+        Sound.music("assets/sounds/game_over.mp3")
         while running:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.terminate()
                 if event.type == pygame.MOUSEBUTTONDOWN:
-                    self.start_screen(self)
+                    # TODO new game
+                    self.terminate()
                 self.screen.blit(image, (0, 0))
                 pygame.display.flip()
-
-    @staticmethod
-    def music(filename, volume=0.5, repeat=1):
-        pygame.mixer.music.load(filename)
-        pygame.mixer.music.set_volume(volume)
-        pygame.mixer.music.play(repeat)
-
-    @staticmethod
-    def pause_music():
-        pygame.mixer.music.pause()
-
-    @staticmethod
-    def sound(filename):
-        pygame.mixer.Sound(filename).play()
 
     def obj_move(self):
         for elem in self.shop:
             elem.move()
 
-    def loop(self):
+    def load_new_game(self):
+        self.screen.fill((0, 0, 0))
         available_tile, unavailable_tile = self.render_map(self.chunk)
         available_tile.draw(self.screen)
         unavailable_tile.draw(self.screen)
@@ -297,51 +319,54 @@ class Game:
         schedule.every(2).to(5).seconds.do(self.enemy_move)
         schedule.every(0.5).seconds.do(self.obj_move)
 
+    def loop(self):
+
         self.start_screen()
+        self.load_new_game()
+
+        first_start = True
 
         while True:
-            self.screen.fill((0, 0, 0))
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.terminate()
 
                 if event.type == pygame.KEYDOWN:
-                    keys, flag = pygame.key.get_pressed(), True
-
+                    keys = pygame.key.get_pressed()
                     if keys[pygame.K_m] and self.nearest_trader.check(self.mainhero):
                         self.is_trader_active = False if self.is_trader_active else True
                         if self.is_trader_active:
-                            self.music("assets/sounds/morshu.wav")
+                            Sound.music("assets/sounds/morshu.wav")
                         self.up = self.down = self.right = self.left = False
 
                     if keys[pygame.K_w] and not self.is_trader_active:
-                        self.music("assets/sounds/step.wav", volume=0.1, repeat=-1)
+                        Sound.sound("assets/sounds/step.wav", volume=0.1, repeat=-1)
                         self.up, self.down = True, False
                     if keys[pygame.K_a] and not self.is_trader_active:
-                        self.music("assets/sounds/step.wav", volume=0.1, repeat=-1)
+                        Sound.sound("assets/sounds/step.wav", volume=0.1, repeat=-1)
                         self.left, self.right = True, False
                     if keys[pygame.K_s] and not self.is_trader_active:
-                        self.music("assets/sounds/step.wav", volume=0.1, repeat=-1)
+                        Sound.sound("assets/sounds/step.wav", volume=0.1, repeat=-1)
                         self.down, self.up = True, False
                     if keys[pygame.K_d] and not self.is_trader_active:
-                        self.music("assets/sounds/step.wav", volume=0.1, repeat=-1)
+                        Sound.sound("assets/sounds/step.wav", volume=0.1, repeat=-1)
                         self.right, self.left = True, False
 
                     if keys[pygame.K_y] and self.is_trader_active and self.is_chosen[0]:
-                        self.nearest_trader.sell(self.hero, self.is_chosen[-1], self.sound, self.screen)
+                        self.nearest_trader.sell(self.hero, self.is_chosen[-1], Sound.sound, self.screen)
 
                     if keys[pygame.K_n] and self.is_trader_active and self.is_chosen[0]:
                         self.is_chosen = [False, ""]
 
                     if self.hero.get_stamina()[1] <= 20:
-                        self.pause_music()
+                        Sound.pause_music()
                         self.is_running = False
 
                     else:
                         if (keys[pygame.K_LSHIFT] and not self.is_trader_active and
                                 (self.up or self.down or self.left or self.right)):
-                            self.pause_music()
-                            self.music("assets/sounds/run.wav", volume=0.1, repeat=-1)
+                            Sound.pause_music()
+                            Sound.sound("assets/sounds/run.wav", volume=0.1, repeat=-1)
                             self.is_running = True
 
                 if event.type == pygame.KEYUP and not self.is_trader_active:
@@ -351,19 +376,19 @@ class Game:
                     if keys[pygame.K_w]:
                         self.up = False
                         self.hero.move(self.chunk, "up", stop=True)
-                        self.pause_music()
+                        Sound.pause_music()
                     if keys[pygame.K_a]:
                         self.left = False
                         self.hero.move(self.chunk, "left", stop=True)
-                        self.pause_music()
+                        Sound.pause_music()
                     if keys[pygame.K_s]:
                         self.down = False
                         self.hero.move(self.chunk, "down", stop=True)
-                        self.pause_music()
+                        Sound.pause_music()
                     if keys[pygame.K_d]:
                         self.right = False
                         self.hero.move(self.chunk, "right", stop=True)
-                        self.pause_music()
+                        Sound.pause_music()
 
                 if self.is_trader_active and self.nearest_trader.check(self.mainhero):
                     self.nearest_trader.draw_interface(Game)
@@ -406,7 +431,7 @@ class Game:
             elif self.right:
                 self.hero.move(self.chunk, "right")
 
-            x, y = self.hero.get_coords()[0], self.hero.get_coords()[1]
+            x, y = self.hero.get_coords()
 
             if TILES_COUNT_X * TILE_WIDTH <= x or x <= 0 or TILES_COUNT_Y * TILE_HEIGHT <= y or y <= 0:
 
@@ -438,8 +463,6 @@ class Game:
                             "chunk": self.chunk,
                             "available_tile": self.available_tile,
                             "enemy_visions": self.enemy_visions,
-                            "sound": self.sound,
-                            "music": self.music,
                             "clots": self.clots,
                             "screen": self.screen,
                         }
@@ -451,8 +474,6 @@ class Game:
                             "chunk": self.chunk,
                             "available_tile": self.available_tile,
                             "enemy_visions": self.enemy_visions,
-                            "sound": self.sound,
-                            "music": self.music,
                             "clots": self.clots,
                             "screen": self.screen,
                         }
@@ -480,34 +501,10 @@ class Game:
             self.hero.heal()
             self.hero.running(self.is_running)
 
-            if not self.is_trader_active:
-                [vision.update(self.screen) for vision in self.enemy_visions]
-                [clot.move(self.hero, self.mainhero, self.weapons, Game, randrange(1, 7)) for clot in self.clots]
-                [enemy.move(self.hero.get_coords(), self.mainhero) for enemy in self.enemies]
-                [[self.coins.add(coin) for coin in enemy.get_coins()] for enemy in self.enemies]
-                [coin.drop(self.mainhero) for coin in self.coins]
-                self.available_tile.draw(self.screen)
-                self.unavailable_tile.draw(self.screen)
-                self.other_obj.draw(self.screen)
-                self.trader.draw(self.screen)
-                [elem.update(self.screen) for elem in self.enemy_visions]
-                self.enemy_visions.draw(self.screen)
-                self.enemies.draw(self.screen)
-                self.clots.draw(self.screen)
-                self.coins.draw(self.screen)
-                pygame.draw.circle(self.screen, (101, 101, 101),
-                                   (self.hero.get_coords()[0] + 19 / 2, self.hero.get_coords()[1] + 31 / 2),
-                                   self.hero.get_range(), 1)
-                self.mainhero.draw(self.screen)
-                if self.is_weapon_active:
-                    self.weapons.draw(self.screen)
-            else:
-                self.nearest_trader.draw_interface(Game)
+            self.draw_sprites()
 
-            self.draw_interface()
+            if first_start:
+                Image.alt_fade(self.screen, self.clock, self.draw_sprites)
+                first_start = False
 
-            if self.is_chosen[0]:
-                self.nearest_trader.say(self.screen)
-
-            pygame.display.flip()
             self.clock.tick(30)

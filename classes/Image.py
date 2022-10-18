@@ -1,5 +1,7 @@
 import pygame
 
+from helpers.config import TILES_COUNT_X, TILE_WIDTH, TILES_COUNT_Y, TILE_HEIGHT
+
 
 class Image:
 
@@ -25,7 +27,7 @@ class Image:
             else:
                 done = True
 
-            screen.fill((30, 30, 30))
+            screen.fill((0, 0, 0))
             screen.blit(surf, (0, 0))
             pygame.display.flip()
             clock.tick(30)
@@ -44,7 +46,31 @@ class Image:
             else:
                 done = True
 
-            screen.fill((30, 30, 30))
+            screen.fill((0, 0, 0))
             screen.blit(surf, (0, 0))
+            pygame.display.flip()
+            clock.tick(30)
+
+    @staticmethod
+    def alt_fade(screen, clock, callback_draw, skip=True):
+        done, alpha = False, 255
+
+        s = pygame.Surface((TILES_COUNT_X * TILE_WIDTH, TILES_COUNT_Y * TILE_HEIGHT), pygame.SRCALPHA)
+        s.fill((0, 0, 0, alpha))  # notice the alpha value in the color
+
+        while not done:
+            for event in pygame.event.get():
+                possible_events = [pygame.MOUSEBUTTONDOWN, pygame.KEYDOWN]
+                if event.type == pygame.QUIT or (event.type in possible_events and skip):
+                    done = True
+            if alpha > 0:
+                alpha -= 4
+                alpha = max(0, alpha)
+                s.fill((0, 0, 0, alpha))
+            else:
+                done = True
+
+            callback_draw(auto_update=False)
+            screen.blit(s, (0, 0))
             pygame.display.flip()
             clock.tick(30)
