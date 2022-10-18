@@ -44,12 +44,11 @@ class Game:
         pygame.display.set_icon(OTHER_OBJECTS["logo"])
 
         self.is_weapon_active = False
-        self.hero = MainHero([10, 10], 'MainHero', HERO_HP, money=HERO_MONEY)
+        self.hero = MainHero([20, 20], 'MainHero', HERO_HP, money=HERO_MONEY)
         self.weapons.add(self.hero.get_weapon())
         self.mainhero.add(self.hero)
         self.nearest_trader = Trader()
         self.trader.add(self.nearest_trader)
-        self.up = self.down = self.left = self.right = self.is_running = False
 
         self.background.add(Object(
             OTHER_OBJECTS["background"][0], [0, 0], [TILES_COUNT_X * TILE_WIDTH, TILES_COUNT_Y * TILE_HEIGHT],
@@ -339,56 +338,18 @@ class Game:
                             Sound.music("assets/sounds/morshu.wav")
                         self.up = self.down = self.right = self.left = False
 
-                    if keys[pygame.K_w] and not self.is_trader_active:
-                        Sound.sound("assets/sounds/step.wav", volume=0.1, repeat=-1)
-                        self.up, self.down = True, False
-                    if keys[pygame.K_a] and not self.is_trader_active:
-                        Sound.sound("assets/sounds/step.wav", volume=0.1, repeat=-1)
-                        self.left, self.right = True, False
-                    if keys[pygame.K_s] and not self.is_trader_active:
-                        Sound.sound("assets/sounds/step.wav", volume=0.1, repeat=-1)
-                        self.down, self.up = True, False
-                    if keys[pygame.K_d] and not self.is_trader_active:
-                        Sound.sound("assets/sounds/step.wav", volume=0.1, repeat=-1)
-                        self.right, self.left = True, False
-
                     if keys[pygame.K_y] and self.is_trader_active and self.is_chosen[0]:
                         self.nearest_trader.sell(self.hero, self.is_chosen[-1], Sound.sound, self.screen)
 
                     if keys[pygame.K_n] and self.is_trader_active and self.is_chosen[0]:
                         self.is_chosen = [False, ""]
 
-                    if self.hero.get_stamina()[1] <= 20:
-                        Sound.pause_music()
-                        self.is_running = False
+                    if keys[pygame.K_LSHIFT] and self.hero.get_stamina()[1] >= 20:
+                        self.hero.set_flag(True)
 
-                    else:
-                        if (keys[pygame.K_LSHIFT] and not self.is_trader_active and
-                                (self.up or self.down or self.left or self.right)):
-                            Sound.pause_music()
-                            Sound.sound("assets/sounds/run.wav", volume=0.1, repeat=-1)
-                            self.is_running = True
-
-                if event.type == pygame.KEYUP and not self.is_trader_active:
-                    if keys[pygame.K_LSHIFT]:
-                        self.is_running = False
-
-                    if keys[pygame.K_w]:
-                        self.up = False
-                        self.hero.move(self.chunk, "up", stop=True)
-                        Sound.pause_music()
-                    if keys[pygame.K_a]:
-                        self.left = False
-                        self.hero.move(self.chunk, "left", stop=True)
-                        Sound.pause_music()
-                    if keys[pygame.K_s]:
-                        self.down = False
-                        self.hero.move(self.chunk, "down", stop=True)
-                        Sound.pause_music()
-                    if keys[pygame.K_d]:
-                        self.right = False
-                        self.hero.move(self.chunk, "right", stop=True)
-                        Sound.pause_music()
+                if event.type == pygame.KEYUP:
+                    if keys[pygame.K_LSHIFT] or self.hero.get_stamina()[1] < 20:
+                        self.hero.set_flag(False)                    
 
                 if self.is_trader_active and self.nearest_trader.check(self.mainhero):
                     self.nearest_trader.draw_interface(Game)
@@ -422,26 +383,28 @@ class Game:
                             self.is_weapon_active = elem.move(*event.pos, *event.rel, self.hero, self.enemies,
                                                               self.is_weapon_active)
 
-            if self.up:
-                self.hero.move(self.chunk, "up")
-            elif self.down:
-                self.hero.move(self.chunk, "down")
-            elif self.left:
-                self.hero.move(self.chunk, "left")
-            elif self.right:
-                self.hero.move(self.chunk, "right")
+                if not self.is_trader_active:
+                    '''
+                    if self.hero.get_running():
+                        self.hero.running(event)
+                    else:
+                        self.hero.handling(event) 
+                    '''  
+                    self.hero.handling(event) 
+
+            self.hero.animation(event)
 
             x, y = self.hero.get_coords()
 
-            if TILES_COUNT_X * TILE_WIDTH <= x or x <= 0 or TILES_COUNT_Y * TILE_HEIGHT <= y or y <= 0:
+            if TILES_COUNT_X * TILE_WIDTH - 8 == x or x == 8 or TILES_COUNT_Y * TILE_HEIGHT - 8 == y or y == 8:
 
-                if TILES_COUNT_X * TILE_WIDTH <= x:
+                if TILES_COUNT_X * TILE_WIDTH - 8 == x:
                     self.cur_x += 1
-                if x <= 0:
+                if x == 8:
                     self.cur_x -= 1
-                if TILES_COUNT_Y * TILE_HEIGHT <= y:
+                if TILES_COUNT_Y * TILE_HEIGHT - 8 == y:
                     self.cur_y += 1
-                if y <= 0:
+                if y == 8:
                     self.cur_y -= 1
 
                 cur_x = FIELD_SIZE_X - 1 if self.cur_x < 0 else self.cur_x
@@ -483,25 +446,28 @@ class Game:
                         cur_x] = self.available_tile, self.unavailable_tile, self.other_obj, self.enemies, self.enemy_visions, self.trader, self.clots, self.chunk, self.coins
                 else:
                     self.available_tile, self.unavailable_tile, self.other_obj, self.enemies, self.enemy_visions, self.trader, self.clots, self.chunk, self.coins = \
-                    self.field[cur_y][cur_x]
+                    self.field[cur_y][cur_x]   
 
-            if TILES_COUNT_X * TILE_WIDTH <= self.hero.get_coords()[0]:
-                self.hero.set_coords(1, self.hero.get_coords()[1])
+            if TILES_COUNT_X * TILE_WIDTH - 8 == self.hero.get_coords()[0]:
+                self.hero.set_coords(8, self.hero.get_coords()[1])
 
-            elif self.hero.get_coords()[0] <= 0:
-                self.hero.set_coords(TILES_COUNT_X * TILE_WIDTH, self.hero.get_coords()[1])
+            elif self.hero.get_coords()[0] == 8:
+                self.hero.set_coords(TILES_COUNT_X * TILE_WIDTH - 8, self.hero.get_coords()[1])
 
-            if TILES_COUNT_Y * TILE_HEIGHT <= self.hero.get_coords()[1]:
-                self.hero.set_coords(self.hero.get_coords()[0], 1)
+            if TILES_COUNT_Y * TILE_HEIGHT - 8 == self.hero.get_coords()[1]:
+                self.hero.set_coords(self.hero.get_coords()[0], 8)
 
-            elif self.hero.get_coords()[1] <= 0:
-                self.hero.set_coords(self.hero.get_coords()[0], TILES_COUNT_Y * TILE_HEIGHT)
+            elif self.hero.get_coords()[1] == 8:
+                self.hero.set_coords(self.hero.get_coords()[0], TILES_COUNT_Y * TILE_HEIGHT - 8)
 
             schedule.run_pending()
             self.hero.heal()
-            self.hero.running(self.is_running)
-
             self.draw_sprites()
+            self.mainhero.update()
+            print(self.hero.get_coords())
+
+            if self.hero.get_stamina()[1] <= 0:
+                self.hero.set_flag(False)                    
 
             if first_start:
                 Image.alt_fade(self.screen, self.clock, self.draw_sprites)
