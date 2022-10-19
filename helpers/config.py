@@ -8,6 +8,8 @@ SOUND_MOVEMENT_CHANNEL_VOLUME = 0.3
 HERO_HP = 100
 HERO_MONEY = 200
 
+# FADE_IN/OUT_SPEED = ...
+
 
 #
 #   Config      #

@@ -56,7 +56,7 @@ class Image:
         done, alpha = False, 255
 
         s = pygame.Surface((TILES_COUNT_X * TILE_WIDTH, TILES_COUNT_Y * TILE_HEIGHT), pygame.SRCALPHA)
-        s.fill((0, 0, 0, alpha))  # notice the alpha value in the color
+        s.fill((0, 0, 0, alpha))
 
         while not done:
             for event in pygame.event.get():

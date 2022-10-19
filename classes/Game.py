@@ -262,7 +262,6 @@ class Game:
     def start_screen(self):
         image, running = OTHER_OBJECTS["begin"], True
         Sound.play(SOUNDS["SOUNDTRACKS"]["start-menu"])
-
         Image.grow(self.screen, self.clock, image)
 
         while running:
@@ -279,7 +278,7 @@ class Game:
                 self.screen.blit(image, (0, 0))
                 pygame.display.flip()
 
-        Sound.pause_music(3000)
+        Sound.stop("bg-music", 3000)
         Image.fade(self.screen, self.clock, image)
 
     def game_over(self):
@@ -336,8 +335,10 @@ class Game:
                     keys = pygame.key.get_pressed()
                     if keys[pygame.K_m] and self.nearest_trader.check(self.mainhero):
                         self.is_trader_active = False if self.is_trader_active else True
-                        # if self.is_trader_active:
-                        #     Sound.music("assets/sounds/morshu.wav")
+                        if self.is_trader_active:
+                            Sound.play(SOUNDS["SOUNDTRACKS"]["trader"])
+                        else:
+                            Sound.play(SOUNDS["SOUNDTRACKS"]["gameplay"])
                         self.up = self.down = self.right = self.left = False
 
                     if keys[pygame.K_w] and not self.is_trader_active:
@@ -360,7 +361,7 @@ class Game:
                         self.is_chosen = [False, ""]
 
                     if self.hero.get_stamina()[1] <= 20:
-                        Sound.pause("movement")
+                        Sound.stop("movement")
                         self.is_running = False
 
                     else:
@@ -376,19 +377,19 @@ class Game:
                     if keys[pygame.K_w]:
                         self.up = False
                         self.hero.move(self.chunk, "up", stop=True)
-                        Sound.pause("movement")
+                        Sound.stop("movement")
                     if keys[pygame.K_a]:
                         self.left = False
                         self.hero.move(self.chunk, "left", stop=True)
-                        Sound.pause("movement")
+                        Sound.stop("movement")
                     if keys[pygame.K_s]:
                         self.down = False
                         self.hero.move(self.chunk, "down", stop=True)
-                        Sound.pause("movement")
+                        Sound.stop("movement")
                     if keys[pygame.K_d]:
                         self.right = False
                         self.hero.move(self.chunk, "right", stop=True)
-                        Sound.pause("movement")
+                        Sound.stop("movement")
 
                 if self.is_trader_active and self.nearest_trader.check(self.mainhero):
                     self.nearest_trader.draw_interface(Game)
@@ -501,9 +502,11 @@ class Game:
             self.hero.heal()
             self.hero.running(self.is_running)
 
-            self.draw_sprites()
+            if not first_start:
+                self.draw_sprites()
 
             if first_start:
+                Sound.play(SOUNDS["SOUNDTRACKS"]["gameplay"])
                 Image.alt_fade(self.screen, self.clock, self.draw_sprites)
                 first_start = False
 
