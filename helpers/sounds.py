@@ -30,9 +30,9 @@ SOUNDS = {
             "path": [SOUNDS_BASE_PATH + f"soundtracks/gameplay/{i}.mp3" for i in range(1, 4)],
             "channel": "bg-music",
         },
-        "fighting": {
-            "path": [SOUNDS_BASE_PATH + f"soundtracks/fighting/{i}.mp3" for i in range(1, 4)],
-            "channel": "fighting",
+        "fight": {
+            "path": [SOUNDS_BASE_PATH + f"soundtracks/fight/{i}.mp3" for i in range(1, 4)],
+            "channel": "bg-music",
         },
         "trader": {
             "path": SOUNDS_BASE_PATH + "soundtracks/trader.mp3",
@@ -54,24 +54,40 @@ SOUNDS = {
             "path": SOUNDS_BASE_PATH + "mainhero/hit.mp3",
             "channel": "main",
         },
+        "pick-coins": {
+            "path": SOUNDS_BASE_PATH + "mainhero/pick-coins.mp3",
+            "channel": "main",
+        },
         "step": {
             "path": SOUNDS_BASE_PATH + "mainhero/step.wav",
+            "channel": "movement",
+        },
+        "step-in-water": {
+            "path": SOUNDS_BASE_PATH + "mainhero/step-in-water.wav",
             "channel": "movement",
         },
         "run": {
             "path": SOUNDS_BASE_PATH + "mainhero/run.wav",
             "channel": "movement",
         },
-    },
-    "TRADER": {
-        "buy-item": {
-            "path": SOUNDS_BASE_PATH + "trader/buy-item.wav",
-            "channel": "main",
+        "run-in-water": {
+            "path": SOUNDS_BASE_PATH + "mainhero/run-in-water.wav",
+            "channel": "movement",
         },
     },
+    # "TRADER": {
+    #     "buy-item": {
+    #         "path": SOUNDS_BASE_PATH + "trader/buy-item.wav",
+    #         "channel": "main",
+    #     },
+    # },
     "ENEMY": {
         "death": {
-            "path": SOUNDS_BASE_PATH + "enemy/death.mp3",
+            "path": SOUNDS_BASE_PATH + "enemy/death.wav",
+            "channel": "main",
+        },
+        "exp-death": {
+            "path": SOUNDS_BASE_PATH + "enemy/exp-death.wav",
             "channel": "main",
         },
         "hit": {
@@ -83,4 +99,10 @@ SOUNDS = {
             "channel": "main",
         },
     },
+    "CONTEXT": {
+        "context": {
+            "path": SOUNDS_BASE_PATH + "context.mp3",
+            "channel": "main",
+        },
+    }
 }

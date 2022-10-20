@@ -167,6 +167,9 @@ class Slime(pygame.sprite.Sprite):
     def get_max_health(self):
         return self.max_health
 
+    def get_is_angry(self):
+        return self.angry
+
     def get_coins(self):
         if self.health <= 0:
             return self.coins

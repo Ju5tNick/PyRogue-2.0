@@ -156,6 +156,7 @@ class MainHero(pygame.sprite.Sprite):
         self.stamina += value
 
     def pay(self, value):
+        Sound.play(SOUNDS["HERO"]["pick-coins"])
         self.balance += value
 
     def running(self, flag):

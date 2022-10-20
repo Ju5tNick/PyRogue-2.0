@@ -254,6 +254,10 @@ class Game:
         if auto_update:
             pygame.display.flip()
 
+    def get_is_fight(self):
+        if any([enemy.get_is_angry() for enemy in self.enemies]):
+            return True
+
     @staticmethod
     def terminate():
         pygame.quit()
@@ -325,6 +329,7 @@ class Game:
         self.load_new_game()
 
         first_start = True
+        now_playing = None
 
         while True:
             for event in pygame.event.get():
@@ -423,6 +428,27 @@ class Game:
                             self.is_weapon_active = elem.move(*event.pos, *event.rel, self.hero, self.enemies,
                                                               self.is_weapon_active)
 
+            # Background nusic handling
+            if not self.get_is_fight() and now_playing != "gameplay" or now_playing is None:
+                track = SOUNDS["SOUNDTRACKS"]["gameplay"]
+                Sound.play(track)
+                now_playing = "gameplay"
+            if self.get_is_fight() and now_playing != "fight":
+                track = SOUNDS["SOUNDTRACKS"]["fight"]
+                Sound.play(track)
+                now_playing = "fight"
+
+            # # Background music handling
+            # if self.get_is_fight() and now_playing != "fight":
+            #     if Sound.overlay(SOUNDS["SOUNDTRACKS"]["fight"]):
+            #         now_playing = "fight"
+            # elif self.is_trader_active and now_playing != "trader":
+            #     if Sound.overlay(SOUNDS["SOUNDTRACKS"]["trader"]):
+            #         now_playing = "trader"
+            # elif now_playing is None:
+            #     if Sound.overlay(SOUNDS["SOUNDTRACKS"]["gameplay"]):
+            #         now_playing = "gameplay"
+
             if self.up:
                 self.hero.move(self.chunk, "up")
             elif self.down:
@@ -483,8 +509,7 @@ class Game:
                     self.field[cur_y][
                         cur_x] = self.available_tile, self.unavailable_tile, self.other_obj, self.enemies, self.enemy_visions, self.trader, self.clots, self.chunk, self.coins
                 else:
-                    self.available_tile, self.unavailable_tile, self.other_obj, self.enemies, self.enemy_visions, self.trader, self.clots, self.chunk, self.coins = \
-                    self.field[cur_y][cur_x]
+                    self.available_tile, self.unavailable_tile, self.other_obj, self.enemies, self.enemy_visions, self.trader, self.clots, self.chunk, self.coins = self.field[cur_y][cur_x]
 
             if TILES_COUNT_X * TILE_WIDTH <= self.hero.get_coords()[0]:
                 self.hero.set_coords(1, self.hero.get_coords()[1])
@@ -506,7 +531,7 @@ class Game:
                 self.draw_sprites()
 
             if first_start:
-                Sound.play(SOUNDS["SOUNDTRACKS"]["gameplay"])
+                # Sound.play(SOUNDS["SOUNDTRACKS"]["gameplay"])
                 Image.alt_fade(self.screen, self.clock, self.draw_sprites)
                 first_start = False
 

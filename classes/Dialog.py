@@ -1,6 +1,9 @@
 import pygame
 import time
+
+from classes.Sound import Sound
 from helpers.images import DIALOG_BAR
+from helpers.sounds import SOUNDS
 
 
 class Dialog(pygame.sprite.Sprite):
@@ -15,6 +18,7 @@ class Dialog(pygame.sprite.Sprite):
         screen.blit(self.image, (self.rect.x, self.rect.y))
 
         if is_slow:
+            Sound.play(SOUNDS["CONTEXT"]["context"])
             self.x = 0
             for i, letter in enumerate(text):
                 message = pygame.font.Font(None, 25).render(letter, True, (0, 0, 0))

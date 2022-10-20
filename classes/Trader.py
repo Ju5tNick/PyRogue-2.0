@@ -40,7 +40,7 @@ class Trader(pygame.sprite.Sprite):
         effects = {"damage": mainhero.add_damage, "stamina": mainhero.add_stamina, "health": mainhero.add_hp}
         if (mainhero.get_balance() - obj.get_cost() >= 0 and obj.get_cost() != 0 and 
             mainhero.get_ex()[2] >= obj.get_lvl()):
-            Sound.play(SOUNDS["TRADER"]["buy-item"])
+            Sound.play(SOUNDS["CONTEXT"]["context"])
             effects[obj.get_effect()](obj.get_ef_value())
             mainhero.buy(obj.get_cost())
 
