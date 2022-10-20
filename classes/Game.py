@@ -3,6 +3,7 @@ import time
 import pygame
 import schedule
 from random import randrange, choice
+from itertools import cycle
 
 from classes.Image import Image
 from classes.MainHero import MainHero
@@ -22,6 +23,7 @@ class Game:
     field = [[None for _ in range(FIELD_SIZE_X)] for _ in range(FIELD_SIZE_Y)]
     cur_x = 2
     cur_y = 2
+    new_x = new_y = cycle([2, 3, 4, 0, 1])
     is_trader_active = False
     is_chosen = [False, ""]
     clock = pygame.time.Clock()
@@ -344,11 +346,11 @@ class Game:
                     if keys[pygame.K_n] and self.is_trader_active and self.is_chosen[0]:
                         self.is_chosen = [False, ""]
 
-                    if keys[pygame.K_LSHIFT] and self.hero.get_stamina()[1] >= 20:
+                    if keys[pygame.K_LSHIFT]:
                         self.hero.set_flag(True)
 
                 if event.type == pygame.KEYUP:
-                    if keys[pygame.K_LSHIFT] or self.hero.get_stamina()[1] < 20:
+                    if keys[pygame.K_LSHIFT]:
                         self.hero.set_flag(False)                    
 
                 if self.is_trader_active and self.nearest_trader.check(self.mainhero):
@@ -383,36 +385,39 @@ class Game:
                             self.is_weapon_active = elem.move(*event.pos, *event.rel, self.hero, self.enemies,
                                                               self.is_weapon_active)
 
+                '''
                 if not self.is_trader_active:
-                    '''
                     if self.hero.get_running():
                         self.hero.running(event)
                     else:
-                        self.hero.handling(event) 
-                    '''  
-                    self.hero.handling(event) 
+                        self.hero.handling(event)  
+                '''
+                self.hero.handling(event, self.hero.get_speed())
 
             self.hero.animation(event)
 
             x, y = self.hero.get_coords()
 
-            if TILES_COUNT_X * TILE_WIDTH - 8 == x or x == 8 or TILES_COUNT_Y * TILE_HEIGHT - 8 == y or y == 8:
+            if TILES_COUNT_X * TILE_WIDTH <= x or x <= 0 or TILES_COUNT_Y * TILE_HEIGHT <= y or y <= 0:
 
-                if TILES_COUNT_X * TILE_WIDTH - 8 == x:
+                if TILES_COUNT_X * TILE_WIDTH <= x:
                     self.cur_x += 1
-                if x == 8:
+
+                if x <= 0:
                     self.cur_x -= 1
-                if TILES_COUNT_Y * TILE_HEIGHT - 8 == y:
+
+                if TILES_COUNT_Y * TILE_HEIGHT <= y:
                     self.cur_y += 1
-                if y == 8:
+
+                if  y <= 0:
                     self.cur_y -= 1
 
-                cur_x = FIELD_SIZE_X - 1 if self.cur_x < 0 else self.cur_x
-                cur_y = FIELD_SIZE_Y - 1 if self.cur_y < 0 else self.cur_y
-                cur_x = 0 if cur_x >= FIELD_SIZE_X else cur_x
-                cur_y = 0 if cur_y >= FIELD_SIZE_Y else cur_y
+                self.cur_x = FIELD_SIZE_X - 1 if self.cur_x < 0 else self.cur_x
+                self.cur_y = FIELD_SIZE_Y - 1 if self.cur_y < 0 else self.cur_y
+                self.cur_x = 0 if self.cur_x >= FIELD_SIZE_X else self.cur_x
+                self.cur_y = 0 if self.cur_y >= FIELD_SIZE_Y else self.cur_y
 
-                if self.field[cur_y][cur_x] is None:
+                if self.field[self.cur_y][self.cur_x] is None:
                     self.chunk, self.other_obj = self.generate()
                     self.available_tile, self.unavailable_tile = self.render_map(self.chunk)
                     self.enemy_visions = pygame.sprite.Group()
@@ -442,29 +447,28 @@ class Game:
                         }
                         self.enemies.add(ExpSlime("name", 40, 50, 5, randrange(15, 26), randrange(20, 31), params))
 
-                    self.field[cur_y][
-                        cur_x] = self.available_tile, self.unavailable_tile, self.other_obj, self.enemies, self.enemy_visions, self.trader, self.clots, self.chunk, self.coins
+                    self.field[self.cur_y][
+                        self.cur_x] = self.available_tile, self.unavailable_tile, self.other_obj, self.enemies, self.enemy_visions, self.trader, self.clots, self.chunk, self.coins
                 else:
                     self.available_tile, self.unavailable_tile, self.other_obj, self.enemies, self.enemy_visions, self.trader, self.clots, self.chunk, self.coins = \
-                    self.field[cur_y][cur_x]   
+                    self.field[self.cur_y][self.cur_x]
 
-            if TILES_COUNT_X * TILE_WIDTH - 8 == self.hero.get_coords()[0]:
-                self.hero.set_coords(8, self.hero.get_coords()[1])
+            if TILES_COUNT_X * TILE_WIDTH <= self.hero.get_coords()[0]:
+                self.hero.set_coords(0, self.hero.get_coords()[1])
 
-            elif self.hero.get_coords()[0] == 8:
-                self.hero.set_coords(TILES_COUNT_X * TILE_WIDTH - 8, self.hero.get_coords()[1])
+            elif self.hero.get_coords()[0] <= 0:
+                self.hero.set_coords(TILES_COUNT_X * TILE_WIDTH, self.hero.get_coords()[1])
 
-            if TILES_COUNT_Y * TILE_HEIGHT - 8 == self.hero.get_coords()[1]:
-                self.hero.set_coords(self.hero.get_coords()[0], 8)
+            if TILES_COUNT_Y * TILE_HEIGHT <= self.hero.get_coords()[1]:
+                self.hero.set_coords(self.hero.get_coords()[0], 0)
 
-            elif self.hero.get_coords()[1] == 8:
-                self.hero.set_coords(self.hero.get_coords()[0], TILES_COUNT_Y * TILE_HEIGHT - 8)
+            elif self.hero.get_coords()[1] <= 0:
+                self.hero.set_coords(self.hero.get_coords()[0], TILES_COUNT_Y * TILE_HEIGHT)
 
             schedule.run_pending()
             self.hero.heal()
             self.draw_sprites()
             self.mainhero.update()
-            print(self.hero.get_coords())
 
             if self.hero.get_stamina()[1] <= 0:
                 self.hero.set_flag(False)                    

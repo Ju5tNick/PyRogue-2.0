@@ -4,7 +4,7 @@ from itertools import cycle
 
 from classes.Sound import Sound
 from classes.Weapon import Weapon
-from helpers.config import TILE_WIDTH, TILE_HEIGHT, TILES_COUNT_Y, TILES_COUNT_X, HERO_RUNNING_SPEED, HERO_SPEED
+from helpers.config import TILE_WIDTH, TILE_HEIGHT, TILES_COUNT_Y, TILES_COUNT_X, HERO_RUNNING_SPEED, HERO_BASE_SPEED
 from helpers.images import HERO_SETS
 
 
@@ -33,16 +33,21 @@ class MainHero(pygame.sprite.Sprite):
         self.pos = Vector2(coords)
         self.vel = Vector2(0, 0)
 
-    def handling(self, event):
+    def handling(self, event, speed):
         if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_LSHIFT:
+                self.speed = 8
+                speed = 8
+
             if event.key == pygame.K_d:
-                self.vel.x = HERO_SPEED
+                self.vel.x = HERO_BASE_SPEED
             elif event.key == pygame.K_a:
-                self.vel.x = -HERO_SPEED
+                self.vel.x = -HERO_BASE_SPEED
             elif event.key == pygame.K_w:
-                self.vel.y = -HERO_SPEED
+                self.vel.y = -HERO_BASE_SPEED
             elif event.key == pygame.K_s:
-                self.vel.y = HERO_SPEED
+                self.vel.y = HERO_BASE_SPEED
+            
 
         elif event.type == pygame.KEYUP:
             if event.key == pygame.K_d and self.vel.x > 0:
@@ -54,8 +59,17 @@ class MainHero(pygame.sprite.Sprite):
             elif event.key == pygame.K_s and self.vel.y > 0:
                 self.vel.y = 0
 
+            if event.key == pygame.K_LSHIFT:
+                self.speed = 4
+
+
+
     def set_flag(self, flag):
         self.is_running = True if flag else False
+        self.speed = 8 if flag else 4
+
+    def get_speed(self):
+        return self.speed
 
     def running(self, event):
         if event.type == pygame.KEYDOWN:
@@ -81,9 +95,6 @@ class MainHero(pygame.sprite.Sprite):
 
         if self.current_stamina > 5:
             self.current_stamina -= 5
-    
-        if self.current_stamina < self.stamina:
-            self.current_stamina += 1
 
     def animation(self, event):
         ind = int(next(self.index))
@@ -116,7 +127,7 @@ class MainHero(pygame.sprite.Sprite):
         self.rect.y = self.pos[1]
 
     def get_running(self):
-        return self.running
+        return self.is_running
 
     def get_hp(self):
         return self.hp
@@ -153,6 +164,9 @@ class MainHero(pygame.sprite.Sprite):
                 self.hp += 1;
                 self.heal_counter = 0
             self.heal_counter += 1
+
+        if self.current_stamina < self.stamina:
+            self.current_stamina += 1
 
     def set_coords(self, new_x, new_y):
         self.pos = new_x, new_y
