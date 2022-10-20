@@ -46,10 +46,6 @@ SOUNDS = {
         }
     },
     "HERO": {
-        "death": {
-            "path": SOUNDS_BASE_PATH + "mainhero/death.mp3",
-            "channel": "main",
-        },
         "hit": {
             "path": SOUNDS_BASE_PATH + "mainhero/hit.mp3",
             "channel": "main",
@@ -92,10 +88,6 @@ SOUNDS = {
         },
         "hit": {
             "path": SOUNDS_BASE_PATH + "enemy/hit.mp3",
-            "channel": "main",
-        },
-        "get-angry": {
-            "path": SOUNDS_BASE_PATH + "enemy/get-angry.wav",
             "channel": "main",
         },
     },

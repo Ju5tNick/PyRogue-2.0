@@ -112,7 +112,6 @@ class Slime(pygame.sprite.Sprite):
                     self.frames, self.can_move, self.required_quantity = self.slime_sets["gets_angry"], False, 7
 
                     if self.cur_frame == 3:
-                        Sound.play(SOUNDS["ENEMY"]["get-angry"])
                         self.angry, self.get_angry, self.required_quantity = True, False, 5
 
                 elif self.angry and not self.get_angry:
@@ -166,9 +165,6 @@ class Slime(pygame.sprite.Sprite):
 
     def get_max_health(self):
         return self.max_health
-
-    def get_is_angry(self):
-        return self.angry
 
     def get_coins(self):
         if self.health <= 0:

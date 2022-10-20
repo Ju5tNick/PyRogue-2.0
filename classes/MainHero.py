@@ -83,7 +83,6 @@ class MainHero(pygame.sprite.Sprite):
         self.hp -= damage
         if self.hp <= 0:
             Sound.stop_all_channels()
-            Sound.play(SOUNDS["HERO"]["death"])
             game.game_over(game)
 
     def add_hp(self, hp):

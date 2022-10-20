@@ -254,10 +254,6 @@ class Game:
         if auto_update:
             pygame.display.flip()
 
-    def get_is_fight(self):
-        if any([enemy.get_is_angry() for enemy in self.enemies]):
-            return True
-
     @staticmethod
     def terminate():
         pygame.quit()
@@ -429,11 +425,11 @@ class Game:
                                                               self.is_weapon_active)
 
             # Background nusic handling
-            if not self.get_is_fight() and now_playing != "gameplay" or now_playing is None:
+            if not any(self.enemies) and now_playing != "gameplay" or now_playing is None:
                 track = SOUNDS["SOUNDTRACKS"]["gameplay"]
                 Sound.play(track)
                 now_playing = "gameplay"
-            if self.get_is_fight() and now_playing != "fight":
+            if any(self.enemies) and now_playing != "fight":
                 track = SOUNDS["SOUNDTRACKS"]["fight"]
                 Sound.play(track)
                 now_playing = "fight"

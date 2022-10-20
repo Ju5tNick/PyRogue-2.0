@@ -93,7 +93,6 @@ class ExpSlime(Slime):
                     self.frames, self.can_move, self.required_quantity = self.slime_sets["gets_angry"], False, 7
 
                     if self.cur_frame == 3:
-                        Sound.play(SOUNDS["ENEMY"]["get-angry"])
                         self.angry, self.get_angry, self.required_quantity = True, False, 5
 
                 elif self.angry and not self.get_angry:
