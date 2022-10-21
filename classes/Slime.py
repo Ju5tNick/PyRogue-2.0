@@ -6,15 +6,21 @@ from classes.Enemy import EnemyVision, EnemyClot
 from classes.Coin import Coin
 from classes.Sound import Sound
 from helpers.config import TILE_WIDTH, TILE_HEIGHT, TILES_COUNT_Y, TILES_COUNT_X
-from helpers.images import SLIME_SETS
 from helpers.sounds import SOUNDS
+from helpers.images import SLIME_SETS, EXP_SLIME_SETS
 
 
 class Slime(pygame.sprite.Sprite):
-    image = SLIME_SETS["image"]
-
-    def __init__(self, name, base_damage, base_health, base_speed, gold_drops, xp_drops, game_params):
+    
+    def __init__(self, name, sltype, base_damage, base_health, base_speed, gold_drops, xp_drops, game_params):
         super().__init__(pygame.sprite.Group())
+
+        if sltype == "regular":
+            self.slime_sets = SLIME_SETS
+            self.image = SLIME_SETS["image"]
+        elif sltype == "explosion":
+            self.slime_sets = EXP_SLIME_SETS
+            self.image = EXP_SLIME_SETS["image"]
 
         self.game = game_params
 
@@ -22,6 +28,7 @@ class Slime(pygame.sprite.Sprite):
         self.die_flag, self.max_health = False, base_health
         self.rect = pygame.Rect(
             *[randrange(50, TILES_COUNT_X * TILE_WIDTH - 50), randrange(50, TILES_COUNT_Y * TILE_HEIGHT - 50)], 21, 24)
+
         while not pygame.sprite.spritecollideany(self, self.game["available_tile"]):
             self.rect = pygame.Rect(
                 *[randrange(50, TILES_COUNT_X * TILE_WIDTH - 50), randrange(50, TILES_COUNT_Y * TILE_HEIGHT - 50)], 21,
@@ -29,8 +36,6 @@ class Slime(pygame.sprite.Sprite):
 
         self.get_angry, self.attack = False, False
         self.animation_counter, self.required_quantity = 0, 5
-
-        self.slime_sets = SLIME_SETS
 
         self.cur_frame, self.frames = 0, []
 
@@ -41,12 +46,13 @@ class Slime(pygame.sprite.Sprite):
         self.coins = []
         self.coords = [self.rect.x, self.rect.y]
 
-    def move(self, hero_coords, mainhero):
+    def move(self):
         flag = True
+        hero_coords = self.game["hero"].get_coords()
         if self.frames == self.slime_sets["die_animation"]:
             self.can_move = False
 
-        if self.vision.check(mainhero) and not self.angry:
+        if self.vision.check(self.game["hero_group"]) and not self.angry:
             self.vision.set_flag()
             self.get_angry = True
 
@@ -76,7 +82,6 @@ class Slime(pygame.sprite.Sprite):
 
             if abs(self.game["hero"].get_coords()[0] - self.rect.x) >= 220 and abs(
                     self.game["hero"].get_coords()[1] - self.rect.y) >= 220 and not self.die_flag and self.angry:
-                print("!")
                 self.angry = self.get_angry = False
                 
         else:
@@ -121,7 +126,6 @@ class Slime(pygame.sprite.Sprite):
                 else:
                     self.frames = self.slime_sets["still"] if stop else self.slime_sets["move"]
 
-
                 if self.attack and not self.get_angry:
                     for _ in range(randrange(1, 4)):
                         self.frames, self.can_move, self.required_quantity = self.slime_sets["attack_animation"], False, 3
@@ -155,7 +159,7 @@ class Slime(pygame.sprite.Sprite):
         if not self.angry:
             self.get_angry = True
         if self.health <= 0 and not self.die_flag:
-            self.die(self.game["hero"])
+            self.die()
 
     def get_coords(self):
         return self.rect.x, self.rect.y
@@ -167,11 +171,9 @@ class Slime(pygame.sprite.Sprite):
         return self.max_health
 
     def get_coins(self):
-        if self.health <= 0:
-            return self.coins
-        return []
+        return self.coins
 
-    def die(self, hero):
+    def die(self):
         if self.health <= 0:
 
             for _ in range(self.gold_drops // 10):
@@ -184,8 +186,10 @@ class Slime(pygame.sprite.Sprite):
                 self.coins.append(Coin(self.coords, 1))
 
             Sound.play(SOUNDS["ENEMY"]["death"])
-            hero.xp_progress += self.xp_drops
-            hero.check_level()
+
+            self.game["hero"].xp_progress += self.xp_drops
+            self.game["hero"].check_level()
+
             self.vision.kill()
             self.cur_frame, self.die_flag = 0, True
 

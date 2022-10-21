@@ -3,6 +3,7 @@ import time
 import pygame
 import schedule
 from random import randrange, choice
+from itertools import cycle
 
 from classes.Image import Image
 from classes.MainHero import MainHero
@@ -21,8 +22,8 @@ class Game:
     screen = pygame.display.set_mode((TILES_COUNT_X * TILE_WIDTH, TILES_COUNT_Y * TILE_HEIGHT))
 
     field = [[None for _ in range(FIELD_SIZE_X)] for _ in range(FIELD_SIZE_Y)]
-    cur_x = 2
-    cur_y = 2
+    cur_x = cur_y = 2
+    new_x = new_y = cycle([2, 3, 4, 0, 1])
     is_trader_active = False
     is_chosen = [False, ""]
     clock = pygame.time.Clock()
@@ -45,12 +46,11 @@ class Game:
         pygame.display.set_icon(OTHER_OBJECTS["logo"])
 
         self.is_weapon_active = False
-        self.hero = MainHero([10, 10], 'MainHero', HERO_HP, money=HERO_MONEY)
+        self.hero = MainHero([20, 20], 'MainHero', HERO_HP, money=HERO_MONEY)
         self.weapons.add(self.hero.get_weapon())
         self.mainhero.add(self.hero)
         self.nearest_trader = Trader()
         self.trader.add(self.nearest_trader)
-        self.up = self.down = self.left = self.right = self.is_running = False
 
         self.background.add(Object(
             OTHER_OBJECTS["background"][0], [0, 0], [TILES_COUNT_X * TILE_WIDTH, TILES_COUNT_Y * TILE_HEIGHT],
@@ -225,7 +225,7 @@ class Game:
         if not self.is_trader_active:
             [vision.update(self.screen) for vision in self.enemy_visions]
             [clot.move(self.hero, self.mainhero, self.weapons, Game, randrange(1, 7)) for clot in self.clots]
-            [enemy.move(self.hero.get_coords(), self.mainhero) for enemy in self.enemies]
+            [enemy.move() for enemy in self.enemies]
             [[self.coins.add(coin) for coin in enemy.get_coins()] for enemy in self.enemies]
             [coin.drop(self.mainhero) for coin in self.coins]
             self.available_tile.draw(self.screen)
@@ -291,7 +291,6 @@ class Game:
                 if event.type == pygame.QUIT:
                     self.terminate()
                 if event.type == pygame.MOUSEBUTTONDOWN:
-                    # TODO new game
                     self.terminate()
                 self.screen.blit(image, (0, 0))
                 pygame.display.flip()
@@ -340,20 +339,6 @@ class Game:
                             Sound.play(SOUNDS["SOUNDTRACKS"]["trader"])
                         else:
                             Sound.play(SOUNDS["SOUNDTRACKS"]["gameplay"])
-                        self.up = self.down = self.right = self.left = False
-
-                    if keys[pygame.K_w] and not self.is_trader_active:
-                        Sound.play(SOUNDS["HERO"]["step"])
-                        self.up, self.down = True, False
-                    if keys[pygame.K_a] and not self.is_trader_active:
-                        Sound.play(SOUNDS["HERO"]["step"])
-                        self.left, self.right = True, False
-                    if keys[pygame.K_s] and not self.is_trader_active:
-                        Sound.play(SOUNDS["HERO"]["step"])
-                        self.down, self.up = True, False
-                    if keys[pygame.K_d] and not self.is_trader_active:
-                        Sound.play(SOUNDS["HERO"]["step"])
-                        self.right, self.left = True, False
 
                     if keys[pygame.K_y] and self.is_trader_active and self.is_chosen[0]:
                         self.nearest_trader.sell(self.hero, self.is_chosen[-1])
@@ -361,36 +346,16 @@ class Game:
                     if keys[pygame.K_n] and self.is_trader_active and self.is_chosen[0]:
                         self.is_chosen = [False, ""]
 
-                    if self.hero.get_stamina()[1] <= 20:
-                        Sound.stop("movement")
-                        self.is_running = False
-
-                    else:
-                        if (keys[pygame.K_LSHIFT] and not self.is_trader_active and
-                                (self.up or self.down or self.left or self.right)):
-                            Sound.play(SOUNDS["HERO"]["run"])
-                            self.is_running = True
-
-                if event.type == pygame.KEYUP and not self.is_trader_active:
                     if keys[pygame.K_LSHIFT]:
-                        self.is_running = False
+                        self.hero.set_flag(True)
 
-                    if keys[pygame.K_w]:
-                        self.up = False
-                        self.hero.move(self.chunk, "up", stop=True)
-                        Sound.stop("movement")
-                    if keys[pygame.K_a]:
-                        self.left = False
-                        self.hero.move(self.chunk, "left", stop=True)
-                        Sound.stop("movement")
-                    if keys[pygame.K_s]:
-                        self.down = False
-                        self.hero.move(self.chunk, "down", stop=True)
-                        Sound.stop("movement")
-                    if keys[pygame.K_d]:
-                        self.right = False
-                        self.hero.move(self.chunk, "right", stop=True)
-                        Sound.stop("movement")
+                if event.type == pygame.KEYUP:
+                    if keys[pygame.K_LSHIFT]:
+                        self.hero.set_flag(False)
+
+                if not self.is_trader_active:
+                    self.hero.check_water(self.unavailable_tile)
+                    self.hero.move(event)
 
                 if self.is_trader_active and self.nearest_trader.check(self.mainhero):
                     self.nearest_trader.draw_interface(Game)
@@ -434,25 +399,7 @@ class Game:
                 Sound.play(track)
                 now_playing = "fight"
 
-            # # Background music handling
-            # if self.get_is_fight() and now_playing != "fight":
-            #     if Sound.overlay(SOUNDS["SOUNDTRACKS"]["fight"]):
-            #         now_playing = "fight"
-            # elif self.is_trader_active and now_playing != "trader":
-            #     if Sound.overlay(SOUNDS["SOUNDTRACKS"]["trader"]):
-            #         now_playing = "trader"
-            # elif now_playing is None:
-            #     if Sound.overlay(SOUNDS["SOUNDTRACKS"]["gameplay"]):
-            #         now_playing = "gameplay"
-
-            if self.up:
-                self.hero.move(self.chunk, "up")
-            elif self.down:
-                self.hero.move(self.chunk, "down")
-            elif self.left:
-                self.hero.move(self.chunk, "left")
-            elif self.right:
-                self.hero.move(self.chunk, "right")
+            self.hero.animation(event)
 
             x, y = self.hero.get_coords()
 
@@ -460,19 +407,22 @@ class Game:
 
                 if TILES_COUNT_X * TILE_WIDTH <= x:
                     self.cur_x += 1
+
                 if x <= 0:
                     self.cur_x -= 1
+
                 if TILES_COUNT_Y * TILE_HEIGHT <= y:
                     self.cur_y += 1
+
                 if y <= 0:
                     self.cur_y -= 1
 
-                cur_x = FIELD_SIZE_X - 1 if self.cur_x < 0 else self.cur_x
-                cur_y = FIELD_SIZE_Y - 1 if self.cur_y < 0 else self.cur_y
-                cur_x = 0 if cur_x >= FIELD_SIZE_X else cur_x
-                cur_y = 0 if cur_y >= FIELD_SIZE_Y else cur_y
+                self.cur_x = FIELD_SIZE_X - 1 if self.cur_x < 0 else self.cur_x
+                self.cur_y = FIELD_SIZE_Y - 1 if self.cur_y < 0 else self.cur_y
+                self.cur_x = 0 if self.cur_x >= FIELD_SIZE_X else self.cur_x
+                self.cur_y = 0 if self.cur_y >= FIELD_SIZE_Y else self.cur_y
 
-                if self.field[cur_y][cur_x] is None:
+                if self.field[self.cur_y][self.cur_x] is None:
                     self.chunk, self.other_obj = self.generate()
                     self.available_tile, self.unavailable_tile = self.render_map(self.chunk)
                     self.enemy_visions = pygame.sprite.Group()
@@ -480,54 +430,61 @@ class Game:
                     self.trader = pygame.sprite.Group()
                     self.clots = pygame.sprite.Group()
                     self.coins = pygame.sprite.Group()
-                    for _ in range(randrange(10, 21)):
+                    for _ in range(randrange(10, 15)):
                         params = {
                             "hero": self.hero,
                             "chunk": self.chunk,
+                            "hero_group": self.mainhero,
                             "available_tile": self.available_tile,
                             "enemy_visions": self.enemy_visions,
                             "clots": self.clots,
                             "screen": self.screen,
                         }
-                        self.enemies.add(Slime("name", 10, 100, 2, randrange(5, 15), randrange(10, 21), params))
+                        self.enemies.add(Slime("name", "regular", 10, 100, 2, randrange(5, 15), randrange(10, 21), params))
 
-                    for _ in range(randrange(2, 6)):
+                    for _ in range(randrange(10, 15)):
                         params = {
                             "hero": self.hero,
+                            "hero_group": self.mainhero,
                             "chunk": self.chunk,
+                            "game": Game,
                             "available_tile": self.available_tile,
                             "enemy_visions": self.enemy_visions,
                             "clots": self.clots,
                             "screen": self.screen,
                         }
-                        self.enemies.add(ExpSlime("name", 40, 50, 5, randrange(15, 26), randrange(20, 31), params))
+                        self.enemies.add(ExpSlime("name", "explosion", 40, 50, 10, randrange(15, 26), randrange(20, 31), params))
 
-                    self.field[cur_y][
-                        cur_x] = self.available_tile, self.unavailable_tile, self.other_obj, self.enemies, self.enemy_visions, self.trader, self.clots, self.chunk, self.coins
+                    self.field[self.cur_y][
+                        self.cur_x] = self.available_tile, self.unavailable_tile, self.other_obj, self.enemies, self.enemy_visions, self.trader, self.clots, self.chunk, self.coins
                 else:
-                    self.available_tile, self.unavailable_tile, self.other_obj, self.enemies, self.enemy_visions, self.trader, self.clots, self.chunk, self.coins = self.field[cur_y][cur_x]
+                    self.available_tile, self.unavailable_tile, self.other_obj, self.enemies, self.enemy_visions, self.trader, self.clots, self.chunk, self.coins = \
+                    self.field[self.cur_y][self.cur_x]
 
             if TILES_COUNT_X * TILE_WIDTH <= self.hero.get_coords()[0]:
-                self.hero.set_coords(1, self.hero.get_coords()[1])
+                self.hero.set_coords(0, self.hero.get_coords()[1])
 
             elif self.hero.get_coords()[0] <= 0:
                 self.hero.set_coords(TILES_COUNT_X * TILE_WIDTH, self.hero.get_coords()[1])
 
             if TILES_COUNT_Y * TILE_HEIGHT <= self.hero.get_coords()[1]:
-                self.hero.set_coords(self.hero.get_coords()[0], 1)
+                self.hero.set_coords(self.hero.get_coords()[0], 0)
 
             elif self.hero.get_coords()[1] <= 0:
                 self.hero.set_coords(self.hero.get_coords()[0], TILES_COUNT_Y * TILE_HEIGHT)
 
             schedule.run_pending()
             self.hero.heal()
-            self.hero.running(self.is_running)
 
             if not first_start:
                 self.draw_sprites()
 
+            self.mainhero.update()
+
+            if self.hero.get_stamina()[1] <= 0:
+                self.hero.set_flag(False)
+
             if first_start:
-                # Sound.play(SOUNDS["SOUNDTRACKS"]["gameplay"])
                 Image.alt_fade(self.screen, self.clock, self.draw_sprites)
                 first_start = False
 

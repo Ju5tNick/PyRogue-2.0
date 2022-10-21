@@ -71,12 +71,6 @@ SOUNDS = {
             "channel": "movement",
         },
     },
-    # "TRADER": {
-    #     "buy-item": {
-    #         "path": SOUNDS_BASE_PATH + "trader/buy-item.wav",
-    #         "channel": "main",
-    #     },
-    # },
     "ENEMY": {
         "death": {
             "path": SOUNDS_BASE_PATH + "enemy/death.wav",

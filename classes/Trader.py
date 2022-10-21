@@ -69,7 +69,7 @@ class Trader(pygame.sprite.Sprite):
         return self.trades
 
     def check(self, mainhero):
-        return pygame.sprite.spritecollideany(self, mainhero)  # возвращает булевый тип(пересеклись ли спрайты)
+        return pygame.sprite.spritecollideany(self, mainhero)
 
     def draw_interface(self, game):
         pygame.mouse.set_visible(True)
