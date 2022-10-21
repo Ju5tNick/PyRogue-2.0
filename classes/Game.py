@@ -13,6 +13,7 @@ from classes.ExpSlime import ExpSlime
 from classes.Sound import Sound
 from classes.Tile import AvailableTile, UnavailableTile
 from classes.Trader import Trader
+from classes.Tips import Tip
 from helpers.config import *
 from helpers.images import OTHER_OBJECTS, load_image
 
@@ -36,6 +37,7 @@ class Game:
     weapons = pygame.sprite.Group()
     background = pygame.sprite.Group()
     coins = pygame.sprite.Group()
+    tips = pygame.sprite.Group()
 
     def __init__(self):
         pygame.init()
@@ -44,8 +46,10 @@ class Game:
         pygame.display.set_caption('PyRogue')
         pygame.display.set_icon(OTHER_OBJECTS["logo"])
 
+
+        self.tips.add(Tip("Чтобы ходить, ходи. (тыкай клавиши w, a, s, d). Для ускорение жми левый SHIFT"))
         self.is_weapon_active = False
-        self.hero = MainHero([20, 20], 'MainHero', HERO_HP, money=HERO_MONEY)
+        self.hero = MainHero([50, 50], 'MainHero', HERO_HP, money=HERO_MONEY)
         self.weapons.add(self.hero.get_weapon())
         self.mainhero.add(self.hero)
         self.nearest_trader = Trader()
@@ -240,6 +244,7 @@ class Game:
                                (self.hero.get_coords()[0] + 19 / 2, self.hero.get_coords()[1] + 31 / 2),
                                self.hero.get_range(), 1)
             self.mainhero.draw(self.screen)
+            [tip.draw(self.screen) for tip in self.tips]
             if self.is_weapon_active:
                 self.weapons.draw(self.screen)
         else:
