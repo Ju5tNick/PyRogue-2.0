@@ -4,7 +4,7 @@ from itertools import cycle
 
 from classes.Sound import Sound
 from classes.Weapon import Weapon
-from helpers.config import HERO_RUNNING_SPEED, HERO_BASE_SPEED
+from helpers.config import HERO_RUNNING_SPEED, HERO_BASE_SPEED, ON_CHANGE_TILE
 from helpers.images import HERO_SETS
 from helpers.sounds import SOUNDS
 
@@ -41,10 +41,8 @@ class MainHero(pygame.sprite.Sprite):
         else:
             self.handling(event)
 
-        last_hero_tile = "-in-water" if self.is_water else ""
-        postfix = "-in-water" if self.is_water else ""
-
-        if event.type == pygame.KEYDOWN or last_hero_tile != postfix:
+        if event.type in [pygame.KEYDOWN, ON_CHANGE_TILE]:
+            postfix = "-in-water" if self.is_water else ""
             if self.get_move():
                 if self.get_running():
                     Sound.play(SOUNDS["HERO"][f"run{postfix}"])

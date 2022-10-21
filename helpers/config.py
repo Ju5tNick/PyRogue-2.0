@@ -1,3 +1,5 @@
+import pygame
+
 #
 #   Settings    #
 
@@ -13,7 +15,6 @@ HERO_SPRITE_SIZE = [19, 31]
 
 # FADE_IN/OUT_SPEED = ...
 
-
 #
 #   Config      #
 
@@ -23,3 +24,9 @@ TILES_COUNT_X = 40
 TILES_COUNT_Y = 20
 TILE_WIDTH = 25
 TILE_HEIGHT = 25
+
+MAX_TIP_LENGTH = 180
+
+#
+# Custom pygame events    #
+ON_CHANGE_TILE = pygame.USEREVENT + 1

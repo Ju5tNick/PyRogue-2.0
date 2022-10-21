@@ -1,6 +1,5 @@
 import sys
 import time
-import pygame
 import schedule
 from random import randrange, choice
 from itertools import cycle
@@ -13,6 +12,7 @@ from classes.ExpSlime import ExpSlime
 from classes.Sound import Sound
 from classes.Tile import AvailableTile, UnavailableTile
 from classes.Trader import Trader
+from classes.Tips import Tip
 from helpers.config import *
 from helpers.images import OTHER_OBJECTS, load_image
 from helpers.sounds import SOUNDS
@@ -37,6 +37,7 @@ class Game:
     weapons = pygame.sprite.Group()
     background = pygame.sprite.Group()
     coins = pygame.sprite.Group()
+    tips = pygame.sprite.Group()
 
     def __init__(self):
         pygame.init()
@@ -45,8 +46,10 @@ class Game:
         pygame.display.set_caption('PyRogue')
         pygame.display.set_icon(OTHER_OBJECTS["logo"])
 
+        self.last_tile = "land"
+        self.tips.add(Tip("Чтобы ходить, ходи. (тыкай клавиши w, a, s, d). Для ускорение жми левый SHIFT"))
         self.is_weapon_active = False
-        self.hero = MainHero([20, 20], 'MainHero', HERO_HP, money=HERO_MONEY)
+        self.hero = MainHero([50, 50], 'MainHero', HERO_HP, money=HERO_MONEY)
         self.weapons.add(self.hero.get_weapon())
         self.mainhero.add(self.hero)
         self.nearest_trader = Trader()
@@ -241,6 +244,7 @@ class Game:
                                (self.hero.get_coords()[0] + 19 / 2, self.hero.get_coords()[1] + 31 / 2),
                                self.hero.get_range(), 1)
             self.mainhero.draw(self.screen)
+            [tip.draw(self.screen) for tip in self.tips]
             if self.is_weapon_active:
                 self.weapons.draw(self.screen)
         else:
@@ -317,6 +321,23 @@ class Game:
 
         schedule.every(2).to(5).seconds.do(self.enemy_move)
         schedule.every(0.5).seconds.do(self.obj_move)
+
+    def check_tile(self):
+        av = un = False
+        if pygame.sprite.spritecollideany(self.hero, self.available_tile):
+            av = True
+        if pygame.sprite.spritecollideany(self.hero, self.unavailable_tile):
+            un = True
+
+        if not av and not un or av and un:
+            return
+
+        if av and self.last_tile == "water":
+            self.last_tile = "land"
+            pygame.event.post(pygame.event.Event(ON_CHANGE_TILE))
+        elif un and self.last_tile == "land":
+            self.last_tile = "water"
+            pygame.event.post(pygame.event.Event(ON_CHANGE_TILE))
 
     def loop(self):
 
@@ -400,6 +421,7 @@ class Game:
                 now_playing = "fight"
 
             self.hero.animation(event)
+            self.check_tile()
 
             x, y = self.hero.get_coords()
 
