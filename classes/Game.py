@@ -1,5 +1,4 @@
 import sys
-import time
 import schedule
 from random import randrange, choice
 from itertools import cycle
@@ -286,9 +285,7 @@ class Game:
         Image.fade(self.screen, self.clock, image)
 
     def game_over(self):
-        self.is_first_session = False
         image, running = OTHER_OBJECTS["game_over"], True
-        time.sleep(0.1)
         Sound.play(SOUNDS["GAME"]["game-over"])
         while running:
             for event in pygame.event.get():
@@ -339,6 +336,25 @@ class Game:
             self.last_tile = "water"
             pygame.event.post(pygame.event.Event(ON_CHANGE_TILE))
 
+    def handle_sounds(self, now_playing):
+        is_not_gameplay_or_trader = now_playing not in ["gameplay", "trader"]
+        is_not_trader = now_playing == "trader" and not self.is_trader_active
+
+        if not any(self.enemies) and is_not_gameplay_or_trader or is_not_trader or now_playing is None:
+            if Sound.overlay(SOUNDS["SOUNDTRACKS"]["gameplay"]):
+                now_playing = "gameplay"
+        if any(self.enemies) and now_playing != "fight":
+            if Sound.overlay(SOUNDS["SOUNDTRACKS"]["fight"]):
+                now_playing = "fight"
+        if self.is_trader_active and now_playing != "trader":
+            if Sound.overlay(SOUNDS["SOUNDTRACKS"]["trader"]):
+                now_playing = "trader"
+
+        if not Sound.is_busy("bg-music"):
+            now_playing = None
+
+        return now_playing
+
     def loop(self):
 
         self.start_screen()
@@ -346,20 +362,18 @@ class Game:
 
         first_start = True
         now_playing = None
+        event = None
 
         while True:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.terminate()
 
+                keys = pygame.key.get_pressed()
+
                 if event.type == pygame.KEYDOWN:
-                    keys = pygame.key.get_pressed()
                     if keys[pygame.K_m] and self.nearest_trader.check(self.mainhero):
                         self.is_trader_active = False if self.is_trader_active else True
-                        if self.is_trader_active:
-                            Sound.play(SOUNDS["SOUNDTRACKS"]["trader"])
-                        else:
-                            Sound.play(SOUNDS["SOUNDTRACKS"]["gameplay"])
 
                     if keys[pygame.K_y] and self.is_trader_active and self.is_chosen[0]:
                         self.nearest_trader.sell(self.hero, self.is_chosen[-1])
@@ -410,17 +424,10 @@ class Game:
                             self.is_weapon_active = elem.move(*event.pos, *event.rel, self.hero, self.enemies,
                                                               self.is_weapon_active)
 
-            # Background nusic handling
-            if not any(self.enemies) and now_playing != "gameplay" or now_playing is None:
-                track = SOUNDS["SOUNDTRACKS"]["gameplay"]
-                Sound.play(track)
-                now_playing = "gameplay"
-            if any(self.enemies) and now_playing != "fight":
-                track = SOUNDS["SOUNDTRACKS"]["fight"]
-                Sound.play(track)
-                now_playing = "fight"
+            now_playing = self.handle_sounds(now_playing)
 
-            self.hero.animation(event)
+            if event:
+                self.hero.animation(event)
             self.check_tile()
 
             x, y = self.hero.get_coords()
