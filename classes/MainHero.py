@@ -25,6 +25,7 @@ class MainHero(pygame.sprite.Sprite):
         self.required_xp, self.level, self.max_hp, self.heal_counter, self.range = 10, 1, hp, 0, 100
         self.is_running = False
         self.is_water = False
+        self.is_died = False
 
         self.weapon = Weapon(10, [20, 10], 100)
         self.mask = pygame.mask.from_surface(self.image)
@@ -151,6 +152,7 @@ class MainHero(pygame.sprite.Sprite):
         Sound.play(SOUNDS["HERO"]["hit"])
         self.hp -= damage
         if self.hp <= 0:
+            self.is_died = True
             Sound.stop_all_channels()
             game.game_over(game)
 

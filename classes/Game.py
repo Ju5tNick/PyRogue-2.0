@@ -1,5 +1,6 @@
 import sys
 import schedule
+
 from random import randrange, choice
 from itertools import cycle
 
@@ -20,30 +21,31 @@ from helpers.sounds import SOUNDS
 class Game:
     screen = pygame.display.set_mode((TILES_COUNT_X * TILE_WIDTH, TILES_COUNT_Y * TILE_HEIGHT))
 
-    field = [[None for _ in range(FIELD_SIZE_X)] for _ in range(FIELD_SIZE_Y)]
-    cur_x = cur_y = 2
-    new_x = new_y = cycle([2, 3, 4, 0, 1])
-    is_trader_active = False
-    is_chosen = [False, ""]
-    clock = pygame.time.Clock()
-
-    enemies = pygame.sprite.Group()
-    enemy_visions = pygame.sprite.Group()
-    mainhero = pygame.sprite.Group()
-    trader = pygame.sprite.Group()
-    shop = pygame.sprite.Group()
-    clots = pygame.sprite.Group()
-    weapons = pygame.sprite.Group()
-    background = pygame.sprite.Group()
-    coins = pygame.sprite.Group()
-    tips = pygame.sprite.Group()
-
     def __init__(self):
         pygame.init()
         pygame.font.Font(None, 25)
         pygame.mouse.set_visible(True)
         pygame.display.set_caption('PyRogue')
         pygame.display.set_icon(OTHER_OBJECTS["logo"])
+
+        self.enemies = pygame.sprite.Group()
+        self.enemy_visions = pygame.sprite.Group()
+        self.mainhero = pygame.sprite.Group()
+        self.trader = pygame.sprite.Group()
+        self.shop = pygame.sprite.Group()
+        self.clots = pygame.sprite.Group()
+        self.weapons = pygame.sprite.Group()
+        self.background = pygame.sprite.Group()
+        self.coins = pygame.sprite.Group()
+        self.tips = pygame.sprite.Group()
+
+        self.field = [[None for _ in range(FIELD_SIZE_X)] for _ in range(FIELD_SIZE_Y)]
+        self.cur_x = self.cur_y = 2
+        self.new_x = self.new_y = cycle([2, 3, 4, 0, 1])
+        self.is_trader_active = False
+        self.is_chosen = [False, ""]
+        self.clock = pygame.time.Clock()
+        self.now_playing = None
 
         self.last_tile = "land"
         self.tips.add(Tip("Чтобы ходить, ходи. (тыкай клавиши w, a, s, d). Для ускорение жми левый SHIFT"))
@@ -247,7 +249,7 @@ class Game:
             if self.is_weapon_active:
                 self.weapons.draw(self.screen)
         else:
-            self.nearest_trader.draw_interface(Game)
+            self.nearest_trader.draw_interface(self)
 
         self.draw_interface()
 
@@ -281,6 +283,9 @@ class Game:
                 self.screen.blit(image, (0, 0))
                 pygame.display.flip()
 
+            if not Sound.is_busy("bg-music"):
+                Sound.play(SOUNDS["SOUNDTRACKS"]["start-menu"])
+
         Sound.stop("bg-music", 3000)
         Image.fade(self.screen, self.clock, image)
 
@@ -292,7 +297,7 @@ class Game:
                 if event.type == pygame.QUIT:
                     self.terminate()
                 if event.type == pygame.MOUSEBUTTONDOWN:
-                    self.terminate()
+                    running = False
                 self.screen.blit(image, (0, 0))
                 pygame.display.flip()
 
@@ -336,35 +341,38 @@ class Game:
             self.last_tile = "water"
             pygame.event.post(pygame.event.Event(ON_CHANGE_TILE))
 
-    def handle_sounds(self, now_playing):
-        is_not_gameplay_or_trader = now_playing not in ["gameplay", "trader"]
-        is_not_trader = now_playing == "trader" and not self.is_trader_active
+    def handle_sounds(self):
+        is_not_gameplay_or_trader = self.now_playing not in ["gameplay", "trader"]
+        is_not_trader = self.now_playing == "trader" and not self.is_trader_active
 
-        if not any(self.enemies) and is_not_gameplay_or_trader or is_not_trader or now_playing is None:
+        if not any(self.enemies) and is_not_gameplay_or_trader or is_not_trader or self.now_playing is None:
             if Sound.overlay(SOUNDS["SOUNDTRACKS"]["gameplay"]):
-                now_playing = "gameplay"
-        if any(self.enemies) and now_playing != "fight":
+                self.now_playing = "gameplay"
+        if any(self.enemies) and self.now_playing != "fight":
             if Sound.overlay(SOUNDS["SOUNDTRACKS"]["fight"]):
-                now_playing = "fight"
-        if self.is_trader_active and now_playing != "trader":
+                self.now_playing = "fight"
+        if self.is_trader_active and self.now_playing != "trader":
             if Sound.overlay(SOUNDS["SOUNDTRACKS"]["trader"]):
-                now_playing = "trader"
+                self.now_playing = "trader"
 
         if not Sound.is_busy("bg-music"):
-            now_playing = None
+            self.now_playing = None
 
-        return now_playing
+        return self.now_playing
+
+    def start(self):
+        while True:
+            self.start_screen()
+            self.load_new_game()
+            self.loop()
+            self.__init__()
 
     def loop(self):
 
-        self.start_screen()
-        self.load_new_game()
-
         first_start = True
-        now_playing = None
         event = None
 
-        while True:
+        while not self.hero.is_died:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.terminate()
@@ -393,7 +401,7 @@ class Game:
                     self.hero.move(event)
 
                 if self.is_trader_active and self.nearest_trader.check(self.mainhero):
-                    self.nearest_trader.draw_interface(Game)
+                    self.nearest_trader.draw_interface(self)
 
                     if event.type == pygame.MOUSEBUTTONDOWN:
                         for elem in self.shop:
@@ -424,7 +432,7 @@ class Game:
                             self.is_weapon_active = elem.move(*event.pos, *event.rel, self.hero, self.enemies,
                                                               self.is_weapon_active)
 
-            now_playing = self.handle_sounds(now_playing)
+            self.handle_sounds()
 
             if event:
                 self.hero.animation(event)
