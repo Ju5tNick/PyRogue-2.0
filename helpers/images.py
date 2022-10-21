@@ -80,6 +80,15 @@ EXP_SLIME_SETS = {
         load_image(IMAGES_BASE_PATH + "enemies/exp_slime/explosive/5.png"),
     ],
 
+    "die_animation": [
+        load_image(IMAGES_BASE_PATH + "enemies/slime/die/0.png"),
+        load_image(IMAGES_BASE_PATH + "enemies/slime/die/1.png"),
+        load_image(IMAGES_BASE_PATH + "enemies/slime/die/2.png"),
+        load_image(IMAGES_BASE_PATH + "enemies/slime/die/3.png"),
+        load_image(IMAGES_BASE_PATH + "enemies/slime/die/4.png"),
+        load_image(IMAGES_BASE_PATH + "enemies/slime/die/5.png"),
+    ],
+
     "image": load_image(IMAGES_BASE_PATH + "enemies/exp_slime/static/0.png"),
 }
     

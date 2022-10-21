@@ -20,6 +20,9 @@ class EnemyVision(pygame.sprite.Sprite):
     def move(self, del_x, del_y):
         self.rect = self.rect.move(del_x, del_y)
 
+    def exp_vision(self):
+        pygame.draw.circle(self.image, (255, 0, 0), (self.range, self.range), self.range, 1)
+
     def check(self, mainhero):
         return pygame.sprite.spritecollideany(self, mainhero)
 

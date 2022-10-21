@@ -21,8 +21,7 @@ class Game:
     screen = pygame.display.set_mode((TILES_COUNT_X * TILE_WIDTH, TILES_COUNT_Y * TILE_HEIGHT))
 
     field = [[None for _ in range(FIELD_SIZE_X)] for _ in range(FIELD_SIZE_Y)]
-    cur_x = 2
-    cur_y = 2
+    cur_x = cur_y = 2
     new_x = new_y = cycle([2, 3, 4, 0, 1])
     is_trader_active = False
     is_chosen = [False, ""]
@@ -225,7 +224,7 @@ class Game:
         if not self.is_trader_active:
             [vision.update(self.screen) for vision in self.enemy_visions]
             [clot.move(self.hero, self.mainhero, self.weapons, Game, randrange(1, 7)) for clot in self.clots]
-            [enemy.move(self.hero.get_coords(), self.mainhero) for enemy in self.enemies]
+            [enemy.move() for enemy in self.enemies]
             [[self.coins.add(coin) for coin in enemy.get_coins()] for enemy in self.enemies]
             [coin.drop(self.mainhero) for coin in self.coins]
             self.available_tile.draw(self.screen)
@@ -348,10 +347,16 @@ class Game:
 
                     if keys[pygame.K_LSHIFT]:
                         self.hero.set_flag(True)
-
+                
                 if event.type == pygame.KEYUP:
                     if keys[pygame.K_LSHIFT]:
-                        self.hero.set_flag(False)                    
+                        self.hero.set_flag(False) 
+
+                if not self.is_trader_active:
+                    if self.hero.get_running():
+                        self.hero.running(event)
+                    else:
+                        self.hero.handling(event)                    
 
                 if self.is_trader_active and self.nearest_trader.check(self.mainhero):
                     self.nearest_trader.draw_interface(Game)
@@ -385,15 +390,6 @@ class Game:
                             self.is_weapon_active = elem.move(*event.pos, *event.rel, self.hero, self.enemies,
                                                               self.is_weapon_active)
 
-                '''
-                if not self.is_trader_active:
-                    if self.hero.get_running():
-                        self.hero.running(event)
-                    else:
-                        self.hero.handling(event)  
-                '''
-                self.hero.handling(event, self.hero.get_speed())
-
             self.hero.animation(event)
 
             x, y = self.hero.get_coords()
@@ -425,27 +421,30 @@ class Game:
                     self.trader = pygame.sprite.Group()
                     self.clots = pygame.sprite.Group()
                     self.coins = pygame.sprite.Group()
-                    for _ in range(randrange(10, 21)):
+                    for _ in range(randrange(10, 15)):
                         params = {
                             "hero": self.hero,
                             "chunk": self.chunk,
+                            "hero_group": self.mainhero,
                             "available_tile": self.available_tile,
                             "enemy_visions": self.enemy_visions,
                             "clots": self.clots,
                             "screen": self.screen,
                         }
-                        self.enemies.add(Slime("name", 10, 100, 2, randrange(5, 15), randrange(10, 21), params))
+                        self.enemies.add(Slime("name", "regular", 10, 100, 2, randrange(5, 15), randrange(10, 21), params))
 
-                    for _ in range(randrange(2, 6)):
+                    for _ in range(randrange(10, 15)):
                         params = {
                             "hero": self.hero,
+                            "hero_group": self.mainhero,
                             "chunk": self.chunk,
+                            "game": Game,
                             "available_tile": self.available_tile,
                             "enemy_visions": self.enemy_visions,
                             "clots": self.clots,
                             "screen": self.screen,
                         }
-                        self.enemies.add(ExpSlime("name", 40, 50, 5, randrange(15, 26), randrange(20, 31), params))
+                        self.enemies.add(ExpSlime("name", "explosion", 40, 50, 10, randrange(15, 26), randrange(20, 31), params))
 
                     self.field[self.cur_y][
                         self.cur_x] = self.available_tile, self.unavailable_tile, self.other_obj, self.enemies, self.enemy_visions, self.trader, self.clots, self.chunk, self.coins

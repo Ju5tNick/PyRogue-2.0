@@ -33,12 +33,8 @@ class MainHero(pygame.sprite.Sprite):
         self.pos = Vector2(coords)
         self.vel = Vector2(0, 0)
 
-    def handling(self, event, speed):
+    def handling(self, event):
         if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_LSHIFT:
-                self.speed = 8
-                speed = 8
-
             if event.key == pygame.K_d:
                 self.vel.x = HERO_BASE_SPEED
             elif event.key == pygame.K_a:
@@ -48,8 +44,7 @@ class MainHero(pygame.sprite.Sprite):
             elif event.key == pygame.K_s:
                 self.vel.y = HERO_BASE_SPEED
             
-
-        elif event.type == pygame.KEYUP:
+        if event.type == pygame.KEYUP:
             if event.key == pygame.K_d and self.vel.x > 0:
                 self.vel.x = 0
             elif event.key == pygame.K_a and self.vel.x < 0:
@@ -58,18 +53,6 @@ class MainHero(pygame.sprite.Sprite):
                 self.vel.y = 0
             elif event.key == pygame.K_s and self.vel.y > 0:
                 self.vel.y = 0
-
-            if event.key == pygame.K_LSHIFT:
-                self.speed = 4
-
-
-
-    def set_flag(self, flag):
-        self.is_running = True if flag else False
-        self.speed = 8 if flag else 4
-
-    def get_speed(self):
-        return self.speed
 
     def running(self, event):
         if event.type == pygame.KEYDOWN:
@@ -80,9 +63,9 @@ class MainHero(pygame.sprite.Sprite):
             elif event.key == pygame.K_w:
                 self.vel.y = -HERO_RUNNING_SPEED
             elif event.key == pygame.K_s:
-                self.vel.y = HERO_RUNNING_SPEED
+                self.vel.y = HERO_RUNNING_SPEED          
 
-        elif event.type == pygame.KEYUP:
+        if event.type == pygame.KEYUP:
             if event.key == pygame.K_d and self.vel.x > 0:
                 self.vel.x = 0
             elif event.key == pygame.K_a and self.vel.x < 0:
@@ -92,9 +75,12 @@ class MainHero(pygame.sprite.Sprite):
             elif event.key == pygame.K_s and self.vel.y > 0:
                 self.vel.y = 0
 
-
         if self.current_stamina > 5:
             self.current_stamina -= 5
+        
+
+    def set_flag(self, flag):
+        self.is_running = True if flag else False
 
     def animation(self, event):
         ind = int(next(self.index))
