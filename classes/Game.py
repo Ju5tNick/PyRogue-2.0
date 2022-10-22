@@ -16,6 +16,7 @@ from classes.Tips import Tip
 from helpers.config import *
 from helpers.images import OTHER_OBJECTS, load_image
 from helpers.sounds import SOUNDS
+from helpers.tips import TIPS
 
 
 class Game:
@@ -46,15 +47,16 @@ class Game:
         self.is_chosen = [False, ""]
         self.clock = pygame.time.Clock()
         self.now_playing = None
+        self.tip_counter = 1
 
         self.last_tile = "land"
-        self.tips.add(Tip("Чтобы ходить, ходи. (тыкай клавиши w, a, s, d). Для ускорение жми левый SHIFT"))
         self.is_weapon_active = False
         self.hero = MainHero([50, 50], 'MainHero', HERO_HP, money=HERO_MONEY)
         self.weapons.add(self.hero.get_weapon())
         self.mainhero.add(self.hero)
         self.nearest_trader = Trader()
         self.trader.add(self.nearest_trader)
+        self.tips.add(TIPS[0])
 
         self.background.add(Object(
             OTHER_OBJECTS["background"][0], [0, 0], [TILES_COUNT_X * TILE_WIDTH, TILES_COUNT_Y * TILE_HEIGHT],
@@ -305,6 +307,14 @@ class Game:
         for elem in self.shop:
             elem.move()
 
+    def change_tip(self):
+        if self.tip_counter <= len(TIPS) - 1:
+            self.tips = pygame.sprite.Group()
+            self.tips.add(TIPS[self.tip_counter])
+            self.tip_counter += 1
+        else:
+            self.tips = pygame.sprite.Group()
+
     def load_new_game(self):
         self.screen.fill((0, 0, 0))
         available_tile, unavailable_tile = self.render_map(self.chunk)
@@ -323,6 +333,7 @@ class Game:
 
         schedule.every(2).to(5).seconds.do(self.enemy_move)
         schedule.every(0.5).seconds.do(self.obj_move)
+        schedule.every(15).seconds.do(self.change_tip)
 
     def check_tile(self):
         av = un = False
@@ -380,6 +391,7 @@ class Game:
                 keys = pygame.key.get_pressed()
 
                 if event.type == pygame.KEYDOWN:
+
                     if keys[pygame.K_m] and self.nearest_trader.check(self.mainhero):
                         self.is_trader_active = False if self.is_trader_active else True
 
@@ -440,18 +452,18 @@ class Game:
 
             x, y = self.hero.get_coords()
 
-            if TILES_COUNT_X * TILE_WIDTH <= x or x <= 0 or TILES_COUNT_Y * TILE_HEIGHT <= y or y <= 0:
+            if TILES_COUNT_X * TILE_WIDTH - 5 <= x or x <= 5 or TILES_COUNT_Y * TILE_HEIGHT - 5 <= y or y <= 5:
 
-                if TILES_COUNT_X * TILE_WIDTH <= x:
+                if TILES_COUNT_X * TILE_WIDTH - 5 <= x:
                     self.cur_x += 1
 
-                if x <= 0:
+                if x <= 5:
                     self.cur_x -= 1
 
-                if TILES_COUNT_Y * TILE_HEIGHT <= y:
+                if TILES_COUNT_Y * TILE_HEIGHT - 5 <= y:
                     self.cur_y += 1
 
-                if y <= 0:
+                if y <= 5:
                     self.cur_y -= 1
 
                 self.cur_x = FIELD_SIZE_X - 1 if self.cur_x < 0 else self.cur_x
@@ -477,7 +489,7 @@ class Game:
                             "clots": self.clots,
                             "screen": self.screen,
                         }
-                        self.enemies.add(Slime("name", "regular", 10, 100, 2, randrange(5, 15), randrange(10, 21), params))
+                        self.enemies.add(Slime("name", "regular", 10, 100, 2, randrange(1, 11), randrange(10, 21), params))
 
                     for _ in range(randrange(10, 15)):
                         params = {
@@ -498,17 +510,17 @@ class Game:
                     self.available_tile, self.unavailable_tile, self.other_obj, self.enemies, self.enemy_visions, self.trader, self.clots, self.chunk, self.coins = \
                     self.field[self.cur_y][self.cur_x]
 
-            if TILES_COUNT_X * TILE_WIDTH <= self.hero.get_coords()[0]:
-                self.hero.set_coords(0, self.hero.get_coords()[1])
+            if TILES_COUNT_X * TILE_WIDTH - 5 <= self.hero.get_coords()[0]:
+                self.hero.set_coords(5, self.hero.get_coords()[1])
 
-            elif self.hero.get_coords()[0] <= 0:
-                self.hero.set_coords(TILES_COUNT_X * TILE_WIDTH, self.hero.get_coords()[1])
+            elif self.hero.get_coords()[0] <= 5:
+                self.hero.set_coords(TILES_COUNT_X * TILE_WIDTH - 5, self.hero.get_coords()[1])
 
-            if TILES_COUNT_Y * TILE_HEIGHT <= self.hero.get_coords()[1]:
-                self.hero.set_coords(self.hero.get_coords()[0], 0)
+            if TILES_COUNT_Y * TILE_HEIGHT - 5 <= self.hero.get_coords()[1]:
+                self.hero.set_coords(self.hero.get_coords()[0], 5)
 
-            elif self.hero.get_coords()[1] <= 0:
-                self.hero.set_coords(self.hero.get_coords()[0], TILES_COUNT_Y * TILE_HEIGHT)
+            elif self.hero.get_coords()[1] <= 5:
+                self.hero.set_coords(self.hero.get_coords()[0], TILES_COUNT_Y * TILE_HEIGHT - 5)
 
             schedule.run_pending()
             self.hero.heal()

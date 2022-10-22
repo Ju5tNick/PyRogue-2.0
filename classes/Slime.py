@@ -27,11 +27,11 @@ class Slime(pygame.sprite.Sprite):
         self.name, self.damage, self.health, self.speed = name, base_damage, base_health, base_speed
         self.die_flag, self.max_health = False, base_health
         self.rect = pygame.Rect(
-            *[randrange(50, TILES_COUNT_X * TILE_WIDTH - 50), randrange(50, TILES_COUNT_Y * TILE_HEIGHT - 50)], 21, 24)
+            *[randrange(100, TILES_COUNT_X * TILE_WIDTH - 100), randrange(50, TILES_COUNT_Y * TILE_HEIGHT - 100)], 21, 24)
 
         while not pygame.sprite.spritecollideany(self, self.game["available_tile"]):
             self.rect = pygame.Rect(
-                *[randrange(50, TILES_COUNT_X * TILE_WIDTH - 50), randrange(50, TILES_COUNT_Y * TILE_HEIGHT - 50)], 21,
+                *[randrange(100, TILES_COUNT_X * TILE_WIDTH - 100), randrange(100, TILES_COUNT_Y * TILE_HEIGHT - 100)], 21,
                 24)
 
         self.get_angry, self.attack = False, False

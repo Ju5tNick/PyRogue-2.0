@@ -2,6 +2,8 @@ import pygame
 
 from helpers.config import MAX_TIP_LENGTH
 
+pygame.init()
+
 
 class Tip(pygame.sprite.Sprite):
 
