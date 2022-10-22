@@ -190,6 +190,33 @@ OTHER_OBJECTS = {
     ],
 }
 
+BOSS_SETS = {
+    "attack": {
+            load_image(IMAGES_BASE_PATH + "boss/Attack/0.png"),
+            load_image(IMAGES_BASE_PATH + "boss/Attack/1.png"),
+            load_image(IMAGES_BASE_PATH + "boss/Attack/2.png"),
+            load_image(IMAGES_BASE_PATH + "boss/Attack/3.png"),
+            load_image(IMAGES_BASE_PATH + "boss/Attack/4.png")
+    },
+    "move" : {
+            load_image(IMAGES_BASE_PATH + "boss/Move/0.png"),
+            load_image(IMAGES_BASE_PATH + "boss/Move/1.png"),
+            load_image(IMAGES_BASE_PATH + "boss/Move/2.png"),
+            },
+    "spawn_minion": {
+            load_image(IMAGES_BASE_PATH + "boss/Spawn_minion/0.png"),
+            load_image(IMAGES_BASE_PATH + "boss/Spawn_minion/1.png"),
+            load_image(IMAGES_BASE_PATH + "boss/Spawn_minion/2.png"),
+            load_image(IMAGES_BASE_PATH + "boss/Spawn_minion/3.png"),
+    },
+    "idle": {
+            load_image(IMAGES_BASE_PATH + "boss/Idle/0.png"),
+            load_image(IMAGES_BASE_PATH + "boss/Idle/1.png"),
+            load_image(IMAGES_BASE_PATH + "boss/Idle/2.png"),
+            load_image(IMAGES_BASE_PATH + "boss/Idle/3.png"),
+    }
+}
+
 POTIONS = {
     "corn": {
         "image": load_image(IMAGES_BASE_PATH + "objects/corn.png"),
