@@ -17,7 +17,7 @@ class Weapon(pygame.sprite.Sprite):
             "++": -90, "=+": -135, "-+": -180, "-=": 135, "": -1, "--": 90, "=-": 45, "+-": 0, "+=": -45, "==": -1
         }
 
-    def move(self, x, y, del_x, del_y, hero, enemies, weapon_activated):
+    def move(self, x, y, del_x, del_y, hero, enemies, boss, weapon_activated):
         if hero.check((x, y)):
             pygame.mouse.set_visible(False)
             weapon_activated = True
@@ -29,6 +29,12 @@ class Weapon(pygame.sprite.Sprite):
             if self.crossing:
                 for enemy in hurt_enemies:
                     hero.attack(enemy)
+
+            if pygame.sprite.spritecollide(self, boss, False):
+                for enemy in boss:
+                    if enemy.current_health > 0:
+                        hero.attack(enemy)
+                        
             self.crossing = True if not pygame.sprite.spritecollide(self, enemies, False) else False
         else:
             weapon_activated = False

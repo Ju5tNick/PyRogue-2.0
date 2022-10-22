@@ -153,6 +153,11 @@ SLIME_SETS = {
 }
 
 TRADER_SETS = {
+    "huts": {
+        "open": load_image(IMAGES_BASE_PATH + "trader/open.png"),
+        "close": load_image(IMAGES_BASE_PATH + "trader/close.png"),
+    },
+
     "dishes": [
         load_image(IMAGES_BASE_PATH + "objects/watermelon.png"),
         load_image(IMAGES_BASE_PATH + "objects/fish.png"),
@@ -167,7 +172,7 @@ TRADER_SETS = {
         load_image(IMAGES_BASE_PATH + "objects/potion3.png"),
     ],
 
-    "image": load_image(IMAGES_BASE_PATH + "trader/0.png"),
+    "image": load_image(IMAGES_BASE_PATH + "trader/close.png"),
 }
 
 OTHER_OBJECTS = {
@@ -182,7 +187,7 @@ OTHER_OBJECTS = {
     "heart": load_image(IMAGES_BASE_PATH + "objects/heart.png"),
     "tall_grass": load_image(IMAGES_BASE_PATH + "objects/tall_grass.png"),
     "water_lily": load_image(IMAGES_BASE_PATH + "objects/water_lily.png"),
-    "merchant": [load_image(IMAGES_BASE_PATH + "trader/trader2.png"), "Не надо на меня тыкать!"],
+    "merchant": load_image(IMAGES_BASE_PATH + "trader/trader2.png"),
     "background": [load_image(IMAGES_BASE_PATH + "trader/ocr.jpg"), ""],
     "rock": [
         load_image(IMAGES_BASE_PATH + "objects/rock1.png"),
@@ -216,13 +221,21 @@ BOSS_SETS = {
             load_image(IMAGES_BASE_PATH + "boss/Idle/3.png"),
 
     ],
+    "die": [
+            load_image(IMAGES_BASE_PATH + "boss/Die/0.png"),
+            load_image(IMAGES_BASE_PATH + "boss/Die/1.png"),
+            load_image(IMAGES_BASE_PATH + "boss/Die/2.png"),
+            load_image(IMAGES_BASE_PATH + "boss/Die/3.png"),
+            load_image(IMAGES_BASE_PATH + "boss/Die/4.png"),
+            load_image(IMAGES_BASE_PATH + "boss/Die/5.png")
+    ],
     "image": load_image(IMAGES_BASE_PATH + "boss/Idle/0.png")
 }
 
 POTIONS = {
     "corn": {
         "image": load_image(IMAGES_BASE_PATH + "objects/corn.png"),
-        "info": "Сладкая кукурузка увеличт твое здоровье. Цена: 20 Купить? (Y/N)",
+        "info": "Сладкая кукурузка увеличт твое здоровье. Цена: 20 Купить? [E]",
         "cost": 20, 
         "effect": "health", 
         "ef_value": 5,
@@ -230,7 +243,7 @@ POTIONS = {
     },
     "watermelon": {
         "image": load_image(IMAGES_BASE_PATH + "objects/watermelon.png"),
-        "info": "Сочный арбуз немного увеличит твой запас выносливости. Цена: 15 Купить? (Y/N)",
+        "info": "Сочный арбуз немного увеличит твой запас выносливости. Цена: 15 Купить? [E]",
         "cost": 15,
         "effect": "stamina", 
         "ef_value": 10,
@@ -238,7 +251,7 @@ POTIONS = {
     },
     "small_green_potion": {
         "image": load_image(IMAGES_BASE_PATH + "objects/potion1.png"),
-        "info": "Зеленое зелье увеличит урон твоего меча на 2 единицы. (Нужен 7 уровень) Цена: 50 Купить? (Y/N)",
+        "info": "Зеленое зелье увеличит урон твоего меча на 2 единицы. (Нужен 7 уровень) Цена: 50 Купить? [E]",
         "cost": 50, 
         "effect": "damage", 
         "ef_value": 2,
@@ -246,7 +259,7 @@ POTIONS = {
     },
     "small_red_potion": {
         "image": load_image(IMAGES_BASE_PATH + "objects/potion3.png"),
-        "info": "Красное зелье увеличит твое здоровье на 10hp. (Нужен 7 уровень) Цена: 40 Купить? (Y/N)",
+        "info": "Красное зелье увеличит твое здоровье на 10hp. (Нужен 7 уровень) Цена: 40 Купить? [E]",
         "cost": 40, 
         "effect": "health", 
         "ef_value": 10,
@@ -254,7 +267,7 @@ POTIONS = {
     },   
     "small_blue_potion": {
         "image": load_image(IMAGES_BASE_PATH + "objects/potion2.png"),
-        "info": "Синее зелье увеличит твою выносливость на 15 единиц. (Нужен 7 уровень) Цена: 30 Купить? (Y/N)",
+        "info": "Синее зелье увеличит твою выносливость на 15 единиц. (Нужен 7 уровень) Цена: 30 Купить? [E]",
         "cost": 30, 
         "effect": "stamina", 
         "ef_value": 15,
@@ -271,9 +284,9 @@ COINS = {
 }
 
 MERCHANT_PHRASES = {
-    "no_money": "Маловато у тебя деньжат. Возвращайся, как поднакопишь больше",
+    "no_money": "Маловато у тебя деньжат. Возвращайся, как поднакопишь",
     "dont_selling": "Я продам тебе эту настойку, после того как ты станешь немного опытней",
-    "irritaion": "Не надо на меня тыкать!"
+    "irritaion": "Не надо на меня тыкать! Если я тебе надоел - нажми [ESCAPE]!"
 }
 
 DIALOG_BAR = load_image(IMAGES_BASE_PATH + "objects/dialog.png")

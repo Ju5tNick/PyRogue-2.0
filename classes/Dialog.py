@@ -18,7 +18,7 @@ class Dialog(pygame.sprite.Sprite):
         screen.blit(self.image, (self.rect.x, self.rect.y))
 
         if is_slow:
-            Sound.play(SOUNDS["CONTEXT"]["context"])
+            Sound.play(SOUNDS["CONTEXT"]["allow"])
             self.x = 0
             for i, letter in enumerate(text):
                 message = pygame.font.Font(None, 25).render(letter, True, (0, 0, 0))

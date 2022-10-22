@@ -28,6 +28,8 @@ class Boss(pygame.sprite.Sprite):
 		self.can_move = True
 		self.frame_counter = cycle(range(self.required_counter))
 
+		self.health = self.current_health = 500
+
 	def move(self, hero, hero_group):
 		if self.vision.check(hero_group):
 			self.angry = True
@@ -54,7 +56,7 @@ class Boss(pygame.sprite.Sprite):
 
 			if abs(hero.get_coords()[0] - self.rect.x) <= 100 and abs(
 					hero.get_coords()[1] - self.rect.y) <= 100 and not self.die_flag and self.angry and not self.attack and not self.spawn:
-				if not choice([True, True, True, True]):
+				if choice([False, False, False, True]):
 					self.attack = True
 					self.frame_counter = cycle(range(len(BOSS_SETS["attack"]) + 1))
 				else:
@@ -67,6 +69,17 @@ class Boss(pygame.sprite.Sprite):
 		if self.iter_counter == self.required_counter:
 			ind = int(next(self.frame_counter))
 
+			if self.die_flag:
+				self.frames = BOSS_SETS["die"]
+				self.can_move = False
+				self.attack = False
+				self.image = self.frames[ind]
+
+				if self.frames[ind] == self.frames[-1]:
+					self.vision.kill()
+					self.drop_crown()
+					self.kill()
+
 			if self.attack:
 				self.frames = BOSS_SETS["attack"]
 				self.can_move = False
@@ -78,7 +91,6 @@ class Boss(pygame.sprite.Sprite):
 					self.frame_counter = cycle(range(self.required_counter))
 					ind = int(next(self.frame_counter))
 					self.can_move, self.attack = True, False
-
 
 			elif self.spawn:
 				self.frames = BOSS_SETS["spawn_minion"]
@@ -98,4 +110,21 @@ class Boss(pygame.sprite.Sprite):
 			self.iter_counter = 0
 
 		self.iter_counter += 1
+
+	def draw_hp_bar(self, screen):
+		pygame.draw.rect(screen, (0, 0, 0), (10, 470, 980, 25))
+		pygame.draw.rect(screen, (70, 117, 93), (11, 471, (self.current_health / self.health) * 980 - 2, 23))
+		screen.blit(
+            pygame.font.Font(None, 21).render("boss", True, (255, 255, 255)),
+            (430, 475))
+
+	def drop_crown(self):
+		pass
+
+	def get_damage(self, damage):
+		if self.current_health > 0:
+			self.current_health -= damage
+		if self.current_health <= 0:
+			self.die_flag = True
+			self.frame_counter = cycle(range(len(BOSS_SETS["die"])))
 		

@@ -15,7 +15,7 @@ class Sound:
         return True
 
     @staticmethod
-    def play(track):
+    def play(track, force=False):
         path = track["path"]
 
         if type(path) != str:
@@ -27,7 +27,7 @@ class Sound:
             ch = pygame.mixer.find_channel()
         else:
             ch = pygame.mixer.Channel(params["id"])
-        if not ch or ch.get_busy():
+        if (not ch or ch.get_busy()) and not force:
             return False
         ch.set_volume(params["volume"])
         ch.play(file, loops=params["loops"])

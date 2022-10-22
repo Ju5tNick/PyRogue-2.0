@@ -1,5 +1,6 @@
 import pygame
 
+from helpers.common import terminate
 from helpers.config import TILES_COUNT_X, TILE_WIDTH, TILES_COUNT_Y, TILE_HEIGHT
 
 
@@ -18,7 +19,9 @@ class Image:
         done, alpha = False, 0
         while not done:
             for event in pygame.event.get():
-                if event.type == pygame.QUIT or (event.type == pygame.MOUSEBUTTONDOWN and skip):
+                if event.type == pygame.QUIT:
+                    terminate()
+                if event.type == pygame.MOUSEBUTTONDOWN and skip:
                     done = True
             if alpha < 255:
                 alpha += 2
@@ -37,7 +40,9 @@ class Image:
         done, alpha = False, 255
         while not done:
             for event in pygame.event.get():
-                if event.type == pygame.QUIT or (event.type == pygame.MOUSEBUTTONDOWN and skip):
+                if event.type == pygame.QUIT:
+                    terminate()
+                if event.type == pygame.MOUSEBUTTONDOWN and skip:
                     done = True
             if alpha > 0:
                 alpha -= 2
@@ -61,7 +66,9 @@ class Image:
         while not done:
             for event in pygame.event.get():
                 possible_events = [pygame.MOUSEBUTTONDOWN, pygame.KEYDOWN]
-                if event.type == pygame.QUIT or (event.type in possible_events and skip):
+                if event.type == pygame.QUIT:
+                    terminate()
+                if event.type in possible_events and skip:
                     done = True
             if alpha > 0:
                 alpha -= 4

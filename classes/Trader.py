@@ -14,7 +14,7 @@ class Trader(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__(pygame.sprite.Group())
         self.trader_sets = TRADER_SETS
-        self.rect = pygame.Rect(TILES_COUNT_X * TILE_WIDTH / 2 - 200, TILES_COUNT_Y * TILE_HEIGHT / 2 - 150, 400, 300)
+        self.rect = pygame.Rect(TILES_COUNT_X * TILE_WIDTH / 2 - 200, TILES_COUNT_Y * TILE_HEIGHT / 2 - 180, 160, 130)
         self.mask = pygame.mask.from_surface(self.image)
         self.trades = []
         self.is_said = True
@@ -24,34 +24,38 @@ class Trader(pygame.sprite.Sprite):
             if i <= 1:
                 self.trades.append(
                     Object(
-                    POTIONS[potion]["image"], [650 + i * 22, 278], [21, 21], True, effect=POTIONS[potion]["effect"], 
-                    info=POTIONS[potion]["info"], cost=POTIONS[potion]["cost"], ef_value=POTIONS[potion]["ef_value"], 
-                    required_lvl=POTIONS[potion]["required_lvl"]
+                        POTIONS[potion]["image"], [650 + i * 22, 278], [21, 21], True, effect=POTIONS[potion]["effect"],
+                        info=POTIONS[potion]["info"], cost=POTIONS[potion]["cost"],
+                        ef_value=POTIONS[potion]["ef_value"],
+                        required_lvl=POTIONS[potion]["required_lvl"]
                     ))
             else:
                 self.trades.append(
                     Object(
-                    POTIONS[potion]["image"], [520 + i * 20, 215], [21, 21], True, effect=POTIONS[potion]["effect"], 
-                    info=POTIONS[potion]["info"], cost=POTIONS[potion]["cost"], ef_value=POTIONS[potion]["ef_value"],
-                    required_lvl=POTIONS[potion]["required_lvl"]
+                        POTIONS[potion]["image"], [520 + i * 20, 215], [21, 21], True, effect=POTIONS[potion]["effect"],
+                        info=POTIONS[potion]["info"], cost=POTIONS[potion]["cost"],
+                        ef_value=POTIONS[potion]["ef_value"],
+                        required_lvl=POTIONS[potion]["required_lvl"]
                     ))
 
     def sell(self, mainhero, obj):
         effects = {"damage": mainhero.add_damage, "stamina": mainhero.add_stamina, "health": mainhero.add_hp}
-        if (mainhero.get_balance() - obj.get_cost() >= 0 and obj.get_cost() != 0 and 
-            mainhero.get_ex()[2] >= obj.get_lvl()):
-            Sound.play(SOUNDS["CONTEXT"]["context"])
+        if (mainhero.get_balance() - obj.get_cost() >= 0 and obj.get_cost() != 0 and
+                mainhero.get_ex()[2] >= obj.get_lvl()):
+            Sound.play(SOUNDS["CONTEXT"]["allow"])
             effects[obj.get_effect()](obj.get_ef_value())
             mainhero.buy(obj.get_cost())
 
+        elif mainhero.get_ex()[2] < obj.get_lvl():
+            Sound.play(SOUNDS["CONTEXT"]["deny"])
+            self.set_text(MERCHANT_PHRASES["dont_selling"])
+            self.reset_flag(False)
+
         elif obj.get_info() != MERCHANT_PHRASES["irritaion"]:
+            Sound.play(SOUNDS["CONTEXT"]["deny"])
             self.set_text(MERCHANT_PHRASES["no_money"])
             self.reset_flag(False)
 
-        if mainhero.get_ex()[2] < obj.get_lvl():
-            self.set_text(MERCHANT_PHRASES["dont_selling"]) 
-            self.reset_flag(False)
-            
     def reset_flag(self, value):
         self.is_said = value
 
