@@ -86,8 +86,12 @@ SOUNDS = {
         },
     },
     "CONTEXT": {
-        "context": {
-            "path": SOUNDS_BASE_PATH + "context.mp3",
+        "allow": {
+            "path": SOUNDS_BASE_PATH + "context/allow.mp3",
+            "channel": "main",
+        },
+        "deny": {
+            "path": SOUNDS_BASE_PATH + "context/deny.mp3",
             "channel": "main",
         },
     }

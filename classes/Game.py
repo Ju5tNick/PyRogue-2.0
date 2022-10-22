@@ -12,9 +12,8 @@ from classes.ExpSlime import ExpSlime
 from classes.Sound import Sound
 from classes.Tile import AvailableTile, UnavailableTile
 from classes.Trader import Trader
-from classes.Tips import Tip
 from helpers.config import *
-from helpers.images import OTHER_OBJECTS, load_image
+from helpers.images import OTHER_OBJECTS, load_image, MERCHANT_PHRASES
 from helpers.sounds import SOUNDS
 from helpers.tips import TIPS
 
@@ -45,6 +44,7 @@ class Game:
         self.new_x = self.new_y = cycle([2, 3, 4, 0, 1])
         self.is_trader_active = False
         self.is_chosen = [False, ""]
+        self.is_running = False
         self.clock = pygame.time.Clock()
         self.now_playing = None
         self.tip_counter = 1
@@ -67,7 +67,7 @@ class Game:
             self.shop.add(potion)
 
         self.shop.add(
-            Object(OTHER_OBJECTS["merchant"][0], [254, 276], [101, 107], True, info=OTHER_OBJECTS["merchant"][1])
+            Object(OTHER_OBJECTS["merchant"], [254, 276], [101, 107], True, info=MERCHANT_PHRASES["irritaion"])
         )
 
         self.chunk, self.other_obj = self.generate(no_water=True)
@@ -315,25 +315,7 @@ class Game:
         else:
             self.tips = pygame.sprite.Group()
 
-    def load_new_game(self):
-        self.screen.fill((0, 0, 0))
-        available_tile, unavailable_tile = self.render_map(self.chunk)
-        available_tile.draw(self.screen)
-        unavailable_tile.draw(self.screen)
-
-        self.field[self.cur_y][self.cur_x] = available_tile, unavailable_tile, self.other_obj, self.enemies, self.enemy_visions, self.trader, self.clots, self.chunk, self.coins
-
-        self.trader.draw(self.screen)
-        self.clots.draw(self.screen)
-        self.mainhero.draw(self.screen)
-        self.weapons.draw(self.screen)
-        self.draw_interface()
-        self.is_chosen = [False, ""]
-        self.is_running = False
-
-        schedule.every(2).to(5).seconds.do(self.enemy_move)
-        schedule.every(0.5).seconds.do(self.obj_move)
-        schedule.every(15).seconds.do(self.change_tip)
+    # def load_new_game(self):
 
     def check_tile(self):
         av = un = False
@@ -374,11 +356,17 @@ class Game:
     def start(self):
         while True:
             self.start_screen()
-            self.load_new_game()
             self.loop()
             self.__init__()
 
     def loop(self):
+        objects = self.available_tile, self.unavailable_tile, self.other_obj, self.enemies, self.enemy_visions, \
+                  self.trader, self.clots, self.chunk, self.coins
+        self.field[self.cur_y][self.cur_x] = objects
+
+        schedule.every(2).to(5).seconds.do(self.enemy_move)
+        schedule.every(0.5).seconds.do(self.obj_move)
+        schedule.every(15).seconds.do(self.change_tip)
 
         first_start = True
         event = None
@@ -392,14 +380,15 @@ class Game:
 
                 if event.type == pygame.KEYDOWN:
 
-                    if keys[pygame.K_m] and self.nearest_trader.check(self.mainhero):
-                        self.is_trader_active = False if self.is_trader_active else True
+                    if self.nearest_trader.check(self.mainhero):
+                        if keys[pygame.K_e] and not self.is_trader_active:
+                            self.is_trader_active = True
 
-                    if keys[pygame.K_y] and self.is_trader_active and self.is_chosen[0]:
+                        if keys[pygame.K_ESCAPE] and self.is_trader_active:
+                            self.is_trader_active = False
+
+                    if keys[pygame.K_e] and self.is_trader_active and self.is_chosen[0]:
                         self.nearest_trader.sell(self.hero, self.is_chosen[-1])
-
-                    if keys[pygame.K_n] and self.is_trader_active and self.is_chosen[0]:
-                        self.is_chosen = [False, ""]
 
                     if keys[pygame.K_LSHIFT]:
                         self.hero.set_flag(True)
@@ -444,11 +433,11 @@ class Game:
                             self.is_weapon_active = elem.move(*event.pos, *event.rel, self.hero, self.enemies,
                                                               self.is_weapon_active)
 
+            self.check_tile()
             self.handle_sounds()
 
             if event:
                 self.hero.animation(event)
-            self.check_tile()
 
             x, y = self.hero.get_coords()
 

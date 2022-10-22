@@ -44,11 +44,12 @@ class MainHero(pygame.sprite.Sprite):
 
         if event.type in [pygame.KEYDOWN, ON_CHANGE_TILE]:
             postfix = "-in-water" if self.is_water else ""
+            force = event.type == ON_CHANGE_TILE
             if self.get_move():
                 if self.get_running():
-                    Sound.play(SOUNDS["HERO"][f"run{postfix}"])
+                    Sound.play(SOUNDS["HERO"][f"run{postfix}"], force)
                 else:
-                    Sound.play(SOUNDS["HERO"][f"step{postfix}"])
+                    Sound.play(SOUNDS["HERO"][f"step{postfix}"], force)
         if event.type == pygame.KEYUP:
             if not self.get_move():
                 Sound.stop("movement")
