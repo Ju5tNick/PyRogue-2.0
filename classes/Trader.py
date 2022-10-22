@@ -14,7 +14,7 @@ class Trader(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__(pygame.sprite.Group())
         self.trader_sets = TRADER_SETS
-        self.rect = pygame.Rect(TILES_COUNT_X * TILE_WIDTH / 2 - 200, TILES_COUNT_Y * TILE_HEIGHT / 2 - 150, 400, 300)
+        self.rect = pygame.Rect(TILES_COUNT_X * TILE_WIDTH / 2 - 200, TILES_COUNT_Y * TILE_HEIGHT / 2 - 180, 160, 130)
         self.mask = pygame.mask.from_surface(self.image)
         self.trades = []
         self.is_said = True

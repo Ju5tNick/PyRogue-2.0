@@ -24,8 +24,8 @@ class MainHero(pygame.sprite.Sprite):
         self.balance, self.xp_progress = money, 1
         self.required_xp, self.level, self.max_hp, self.heal_counter, self.range = 10, 1, hp, 0, 100
         self.is_running = False
-        self.is_water = False
         self.is_died = False
+        self.last_tile = "land"
 
         self.weapon = Weapon(10, [20, 10], 100)
         self.mask = pygame.mask.from_surface(self.image)
@@ -43,7 +43,7 @@ class MainHero(pygame.sprite.Sprite):
             self.handling(event)
 
         if event.type in [pygame.KEYDOWN, ON_CHANGE_TILE]:
-            postfix = "-in-water" if self.is_water else ""
+            postfix = "-in-water" if self.last_tile == "water" else ""
             force = event.type == ON_CHANGE_TILE
             if self.get_move():
                 if self.get_running():
@@ -110,6 +110,9 @@ class MainHero(pygame.sprite.Sprite):
     def set_flag(self, flag):
         self.is_running = True if flag else False
 
+    def set_last_tile(self, tile):
+        self.last_tile = tile
+
     def animation(self, event):
         ind = int(next(self.index))
 
@@ -168,12 +171,6 @@ class MainHero(pygame.sprite.Sprite):
     def buy(self, price):
         if self.balance - price >= 0:
             self.balance -= price
-
-    def check_water(self, tile):
-        self.is_water = False
-        if pygame.sprite.spritecollideany(self, tile):
-            self.is_water = True
-        return self.is_water
 
     def is_alive(self):
         return True if self.hp > 0 else False

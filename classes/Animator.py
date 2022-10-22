@@ -17,7 +17,7 @@ class Animator:
     @staticmethod
     def hut_entrance(hero, draw_sprites, trader):
         hero.stop()
-        hero.pos = 378, 240
+        hero.pos = 378, 210
         hero.update()
         hero.image = hero.hero_sets["still"]["up"]
 
@@ -25,7 +25,7 @@ class Animator:
         event = None
 
         hero.vel.y = -0.2
-        for _ in range(100):
+        for _ in range(150):
             Animator.handle_quiet_event()
             hero.animation(event)
             hero.update()
@@ -53,3 +53,6 @@ class Animator:
         for _ in range(100):
             Animator.handle_quiet_event()
             draw_sprites(without_hero=True)
+
+        hero.pos = 378, 240
+        hero.image = hero.hero_sets["still"]["down"]
