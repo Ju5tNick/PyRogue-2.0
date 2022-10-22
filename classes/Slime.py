@@ -39,7 +39,7 @@ class Slime(pygame.sprite.Sprite):
 
         self.cur_frame, self.frames = 0, []
 
-        self.vision = EnemyVision(100, (self.rect.x, self.rect.y), self)
+        self.vision = EnemyVision(100, (self.rect.x, self.rect.y), self, "slime")
         self.game["enemy_visions"].add(self.vision)
         self.gold_drops, self.get_angry, self.angry = gold_drops, False, False
         self.xp_drops, self.flag, self.can_move = xp_drops, -1, True

@@ -13,6 +13,7 @@ from classes.Sound import Sound
 from classes.Tile import AvailableTile, UnavailableTile
 from classes.Trader import Trader
 from classes.Tips import Tip
+from classes.Boss import Boss
 from helpers.config import *
 from helpers.images import OTHER_OBJECTS, load_image
 from helpers.sounds import SOUNDS
@@ -39,6 +40,7 @@ class Game:
         self.background = pygame.sprite.Group()
         self.coins = pygame.sprite.Group()
         self.tips = pygame.sprite.Group()
+        self.boss = pygame.sprite.Group()
 
         self.field = [[None for _ in range(FIELD_SIZE_X)] for _ in range(FIELD_SIZE_Y)]
         self.cur_x = self.cur_y = 2
@@ -57,6 +59,7 @@ class Game:
         self.nearest_trader = Trader()
         self.trader.add(self.nearest_trader)
         self.tips.add(TIPS[0])
+        self.boss.add(Boss([300, 300]))
 
         self.background.add(Object(
             OTHER_OBJECTS["background"][0], [0, 0], [TILES_COUNT_X * TILE_WIDTH, TILES_COUNT_Y * TILE_HEIGHT],
@@ -243,11 +246,14 @@ class Game:
             self.enemies.draw(self.screen)
             self.clots.draw(self.screen)
             self.coins.draw(self.screen)
+            [boss.move(self.hero, self.mainhero) for boss in self.boss]
+            self.boss.draw(self.screen)
             pygame.draw.circle(self.screen, (101, 101, 101),
                                (self.hero.get_coords()[0] + 19 / 2, self.hero.get_coords()[1] + 31 / 2),
                                self.hero.get_range(), 1)
             self.mainhero.draw(self.screen)
             [tip.draw(self.screen) for tip in self.tips]
+
             if self.is_weapon_active:
                 self.weapons.draw(self.screen)
         else:

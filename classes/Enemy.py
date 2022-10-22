@@ -5,13 +5,17 @@ from helpers.images import SLIME_SETS
 
 class EnemyVision(pygame.sprite.Sprite):
 
-    def __init__(self, range, coords, enemy):
+    def __init__(self, range, coords, enemy, entype):
         super().__init__(pygame.sprite.Group())
         self.host, self.range = enemy, range
         self.image = pygame.Surface((3 * self.range, 3 * self.range), pygame.SRCALPHA, 32)
-        pygame.draw.rect(self.image, (255, 0, 0), (self.range - 10, self.range - 16, 22, 5))
-        self.rect = pygame.Rect(coords[0] - self.range + 10.5, coords[1] - self.range + 12, 1.85 * self.range, 1.85 * self.range)
-        self.is_noticed = False
+        if entype == "slime":
+            pygame.draw.rect(self.image, (255, 0, 0), (self.range - 10, self.range - 16, 22, 5))
+            self.rect = pygame.Rect(coords[0] - self.range + 10.5, coords[1] - self.range + 12, 1.85 * self.range, 1.85 * self.range)
+            self.is_noticed = False
+        elif entype == "boss":
+            self.rect = pygame.Rect(coords[0] - self.range + 32, coords[1] - self.range + 32, 1.85 * 2 * self.range, 1.85 * 2 * self.range)
+
 
     def update(self, screen):
         pygame.draw.rect(self.image, (0, 0, 0), (self.range - 10, self.range - 16, 22, 5))
