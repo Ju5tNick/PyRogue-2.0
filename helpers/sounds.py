@@ -71,6 +71,16 @@ SOUNDS = {
             "channel": "movement",
         },
     },
+    "TRADER": {
+        "open-door": {
+            "path": SOUNDS_BASE_PATH + "trader/open-door.wav",
+            "channel": "main",
+        },
+        "close-door": {
+            "path": SOUNDS_BASE_PATH + "trader/close-door.wav",
+            "channel": "main",
+        },
+    },
     "ENEMY": {
         "death": {
             "path": SOUNDS_BASE_PATH + "enemy/death.wav",
@@ -92,6 +102,10 @@ SOUNDS = {
         },
         "deny": {
             "path": SOUNDS_BASE_PATH + "context/deny.mp3",
+            "channel": "main",
+        },
+        "jump": {
+            "path": SOUNDS_BASE_PATH + "context/jump.mp3",
             "channel": "main",
         },
     }

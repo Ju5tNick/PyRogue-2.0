@@ -102,6 +102,11 @@ class MainHero(pygame.sprite.Sprite):
         if self.current_stamina > 5:
             self.current_stamina -= 5
 
+    def stop(self):
+        self.vel.x = 0
+        self.vel.y = 0
+        Sound.stop("movement")
+
     def set_flag(self, flag):
         self.is_running = True if flag else False
 

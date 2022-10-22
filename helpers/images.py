@@ -153,6 +153,11 @@ SLIME_SETS = {
 }
 
 TRADER_SETS = {
+    "huts": {
+        "open": load_image(IMAGES_BASE_PATH + "trader/open.png"),
+        "close": load_image(IMAGES_BASE_PATH + "trader/close.png"),
+    },
+
     "dishes": [
         load_image(IMAGES_BASE_PATH + "objects/watermelon.png"),
         load_image(IMAGES_BASE_PATH + "objects/fish.png"),
@@ -167,7 +172,7 @@ TRADER_SETS = {
         load_image(IMAGES_BASE_PATH + "objects/potion3.png"),
     ],
 
-    "image": load_image(IMAGES_BASE_PATH + "trader/0.png"),
+    "image": load_image(IMAGES_BASE_PATH + "trader/close.png"),
 }
 
 OTHER_OBJECTS = {
