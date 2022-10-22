@@ -31,3 +31,4 @@ MAX_TIP_LENGTH = 180
 # Custom pygame events    #
 
 ON_CHANGE_TILE = pygame.USEREVENT + 1
+ON_END_STAMINA = pygame.USEREVENT + 2

@@ -15,7 +15,7 @@ from classes.Tile import AvailableTile, UnavailableTile
 from classes.Trader import Trader
 from helpers.common import terminate
 from helpers.config import *
-from helpers.images import OTHER_OBJECTS, load_image, MERCHANT_PHRASES, TRADER_SETS
+from helpers.images import OTHER_OBJECTS, load_image, MERCHANT_PHRASES
 from helpers.sounds import SOUNDS
 from helpers.tips import TIPS
 
@@ -46,7 +46,6 @@ class Game:
         self.new_x = self.new_y = cycle([2, 3, 4, 0, 1])
         self.is_trader_active = False
         self.is_chosen = [False, ""]
-        self.is_running = False
         self.clock = pygame.time.Clock()
         self.now_playing = None
         self.tip_counter = 1
@@ -371,7 +370,7 @@ class Game:
         first_start = True
         event = None
 
-        while not self.hero.is_died:
+        while self.hero.is_alive():
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     terminate()
@@ -390,10 +389,13 @@ class Game:
                         self.nearest_trader.sell(self.hero, self.is_chosen[-1])
 
                     if keys[pygame.K_LSHIFT]:
-                        self.hero.set_flag(True)
+                        if not self.is_trader_active and self.hero.get_move() and self.hero.get_stamina()[1] > 20:
+                            self.hero.set_flag(True)
+                        else:
+                            self.hero.set_flag(False)
 
                 if event.type == pygame.KEYUP:
-                    if keys[pygame.K_LSHIFT]:
+                    if event.key == pygame.K_LSHIFT:
                         self.hero.set_flag(False)
 
                 if not self.is_trader_active:
@@ -418,7 +420,6 @@ class Game:
                     self.is_chosen = [False, self.nearest_trader.get_text(), None]
 
                 if event.type == pygame.MOUSEMOTION and pygame.mouse.get_focused():
-
                     if self.hero.check(event.pos) and not self.is_trader_active:
                         self.is_weapon_active = True
                         pygame.mouse.set_visible(False)
@@ -430,6 +431,12 @@ class Game:
                         for elem in self.weapons:
                             self.is_weapon_active = elem.move(*event.pos, *event.rel, self.hero, self.enemies,
                                                               self.is_weapon_active)
+
+            if self.hero.current_stamina > 5 and self.hero.get_running():
+                self.hero.current_stamina -= 5
+            if self.hero.current_stamina < 5 and self.hero.get_running():
+                self.hero.set_flag(False)
+                pygame.event.post(pygame.event.Event(ON_END_STAMINA))
 
             self.check_tile()
             self.handle_sounds()
