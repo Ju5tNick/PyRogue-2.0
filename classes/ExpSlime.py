@@ -7,8 +7,8 @@ from helpers.sounds import SOUNDS
 
 class ExpSlime(Slime):
 
-    def __init__(self, name, sltype, base_damage, base_health, base_speed, gold_drops, xp_drops, game_params):
-        super().__init__(name, sltype, base_damage, base_health, base_speed, gold_drops, xp_drops, game_params)
+    def __init__(self, name, sltype, base_damage, base_health, base_speed, gold_drops, xp_drops, game_params, coords=[]):
+        super().__init__(name, sltype, base_damage, base_health, base_speed, gold_drops, xp_drops, game_params, coords=coords)
         self.game = game_params
 
         self.name, self.damage, self.health, self.speed = name, base_damage, base_health, base_speed
@@ -28,7 +28,7 @@ class ExpSlime(Slime):
         self.coins = []
         self.coords = [self.rect.x, self.rect.y]
 
-    def move(self):
+    def move(self, *qwargs):
         flag = True
         hero_coords = self.game["hero"].get_coords()
         if self.frames == self.slime_sets["explosive"]:

@@ -44,6 +44,8 @@ class Game:
         self.coins = pygame.sprite.Group()
         self.tips = pygame.sprite.Group()
         self.boss = pygame.sprite.Group()
+        self.cracks = pygame.sprite.Group()
+        self.eggs = pygame.sprite.Group()
 
         self.field = [[None for _ in range(FIELD_SIZE_X)] for _ in range(FIELD_SIZE_Y)]
         self.cur_x = self.cur_y = 2
@@ -52,6 +54,7 @@ class Game:
         self.is_chosen = [False, ""]
         self.clock = pygame.time.Clock()
         self.now_playing = None
+        self.is_someone_angry = False
         self.tip_counter = 1
 
         self.is_weapon_active = False
@@ -62,7 +65,7 @@ class Game:
         self.nearest_trader = Trader()
         self.trader.add(self.nearest_trader)
         self.tips.add(TIPS[0])
-        self.boss.add(Boss([300, 300]))
+        
 
         self.background.add(Object(
             OTHER_OBJECTS["background"][0], [0, 0], [TILES_COUNT_X * TILE_WIDTH, TILES_COUNT_Y * TILE_HEIGHT],
@@ -78,6 +81,19 @@ class Game:
 
         self.chunk, self.other_obj = self.generate(no_water=True)
         self.available_tile, self.unavailable_tile = self.render_map(self.chunk)
+
+        self.params = {
+                        "hero": self.hero,
+                        "chunk": self.chunk,
+                        "hero_group": self.mainhero,
+                        "available_tile": self.available_tile,
+                        "enemy_visions": self.enemy_visions,
+                        "clots": self.clots,
+                        "screen": self.screen,  
+                        "game": Game,
+                        "egg_group": self.eggs,
+                        "crack_group": self.cracks
+                    }
 
     def render_map(self, chunk):
         cant_go = pygame.sprite.Group()
@@ -235,7 +251,6 @@ class Game:
 
     def draw_sprites(self, auto_update=True, without_hero=False):
         if not self.is_trader_active:
-            [vision.update(self.screen) for vision in self.enemy_visions]
             [clot.move(self.hero, self.mainhero, self.weapons, Game, randrange(1, 7)) for clot in self.clots]
             [enemy.move() for enemy in self.enemies]
             [[self.coins.add(coin) for coin in enemy.get_coins()] for enemy in self.enemies]
@@ -249,12 +264,16 @@ class Game:
             self.enemies.draw(self.screen)
             self.clots.draw(self.screen)
             self.coins.draw(self.screen)
-            [boss.move(self.hero, self.mainhero) for boss in self.boss]
+            [boss.move(self.hero, self.mainhero, self.params) for boss in self.boss]
+            [egg.move(0, 0) for egg in self.eggs]
+            [crack.update() for crack in self.cracks]
 
             if all([boss.is_die() for boss in self.boss]):
                 [self.other_obj.add(boss.drop_crown()) for boss in self.boss]
 
+            self.cracks.draw(self.screen)
             self.boss.draw(self.screen)
+            self.eggs.draw(self.screen)
             
             if not without_hero:
                 self.mainhero.draw(self.screen)
@@ -323,6 +342,9 @@ class Game:
         for elem in self.shop:
             elem.move()
 
+    def erase_cracks(self):
+        [crack.kill() for crack in self.cracks]
+
     def change_tip(self):
         if self.tip_counter <= len(TIPS) - 1:
             self.tips = pygame.sprite.Group()
@@ -380,10 +402,11 @@ class Game:
         schedule.every(2).to(5).seconds.do(self.enemy_move)
         schedule.every(0.5).seconds.do(self.obj_move)
         schedule.every(15).seconds.do(self.change_tip)
+        schedule.every(5).seconds.do(self.erase_cracks)
 
     def loop(self):
         group = self.available_tile, self.unavailable_tile, self.other_obj, self.enemies, self.enemy_visions, \
-                self.trader, self.clots, self.chunk, self.coins
+                self.trader, self.clots, self.chunk, self.coins, self.boss, self.eggs, self.cracks
         self.field[self.cur_y][self.cur_x] = group
 
         first_start = True
@@ -462,6 +485,9 @@ class Game:
                         for elem in self.weapons:
                             self.is_weapon_active = elem.move(*event.pos, *event.rel, self.hero, self.enemies, self.boss,
                                                               self.is_weapon_active)
+                        for elem in self.weapons:
+                            self.is_weapon_active = elem.move(*event.pos, *event.rel, self.hero, self.eggs, self.boss,
+                                                              self.is_weapon_active)
 
             if self.hero.current_stamina > 5 and self.hero.get_running():
                 self.hero.current_stamina -= 5
@@ -472,13 +498,17 @@ class Game:
             self.check_tile()
             self.handle_sounds()
 
+            self.is_someone_angry = any([enemy.is_angry() for enemy in self.enemies])
+            self.is_boss_angry = any([boss.get_angry() for boss in self.boss])
+
             if event:
                 self.hero.animation(event)
 
             x, y = self.hero.get_coords()
 
-            if TILES_COUNT_X * TILE_WIDTH - 5 <= x or x <= 5 or TILES_COUNT_Y * TILE_HEIGHT - 5 <= y or y <= 5:
-
+            if ((TILES_COUNT_X * TILE_WIDTH - 5 <= x or x <= 5 or TILES_COUNT_Y * TILE_HEIGHT - 5 <= y or y <= 5) 
+                and not self.is_someone_angry and not self.is_boss_angry and not self.is_first_time_at_merchant ):
+                
                 if TILES_COUNT_X * TILE_WIDTH - 5 <= x:
                     self.cur_x += 1
 
@@ -504,28 +534,43 @@ class Game:
                     self.trader = pygame.sprite.Group()
                     self.clots = pygame.sprite.Group()
                     self.coins = pygame.sprite.Group()
-                    params = {
+                    self.cracks = pygame.sprite.Group()
+                    self.eggs = pygame.sprite.Group()
+
+                    self.params = {
                         "hero": self.hero,
                         "chunk": self.chunk,
                         "hero_group": self.mainhero,
                         "available_tile": self.available_tile,
                         "enemy_visions": self.enemy_visions,
                         "clots": self.clots,
-                        "screen": self.screen,
+                        "screen": self.screen,  
+                        "game": Game,
+                        "egg_group": self.eggs,
+                        "crack_group": self.cracks
                     }
-                    for _ in range(randrange(10, 15)):
-                        self.enemies.add(
-                            Slime("name", "regular", 10, 100, 2, randrange(1, 11), randrange(10, 21), params))
+                    
+                    if self.cur_y == 0 and self.cur_x == 0 and self.boss != pygame.sprite.Group():
+                        self.boss.add(Boss([300, 300], self.params))
+                    else:
+                        self.boss = pygame.sprite.Group()
 
                     for _ in range(randrange(10, 15)):
-                        params["game"] = Game
                         self.enemies.add(
-                            ExpSlime("name", "explosion", 40, 50, 10, randrange(15, 26), randrange(20, 31), params))
+                            Slime("name", "regular", 10, 200, 2, randrange(1, 11), randrange(10, 21), self.params))
+
+                    for _ in range(randrange(10, 15)):
+                        self.params["game"] = Game
+                        self.enemies.add(
+                            ExpSlime("name", "explosion", 40, 100, 10, randrange(15, 26), randrange(20, 31), self.params))
 
                     self.field[self.cur_y][
-                        self.cur_x] = self.available_tile, self.unavailable_tile, self.other_obj, self.enemies, self.enemy_visions, self.trader, self.clots, self.chunk, self.coins
+                        self.cur_x] = self.available_tile, self.unavailable_tile, self.other_obj, self.enemies, self.enemy_visions, self.trader, self.clots, self.chunk, self.coins, self.boss, self.eggs, self.cracks
                 else:
-                    self.available_tile, self.unavailable_tile, self.other_obj, self.enemies, self.enemy_visions, self.trader, self.clots, self.chunk, self.coins = \
+                    if self.cur_y != 0 and self.cur_x != 0:
+                        self.boss = pygame.sprite.Group()
+
+                    self.available_tile, self.unavailable_tile, self.other_obj, self.enemies, self.enemy_visions, self.trader, self.clots, self.chunk, self.coins, self.boss, self.eggs, self.cracks = \
                         self.field[self.cur_y][self.cur_x]
 
             if TILES_COUNT_X * TILE_WIDTH - 5 <= self.hero.get_coords()[0]:

@@ -189,6 +189,9 @@ OTHER_OBJECTS = {
     "water_lily": load_image(IMAGES_BASE_PATH + "objects/water_lily.png"),
     "merchant": load_image(IMAGES_BASE_PATH + "trader/trader2.png"),
     "crown": load_image(IMAGES_BASE_PATH + "objects/crown.png"),
+    "egg": load_image(IMAGES_BASE_PATH + "boss/egg.png"),
+    "exp_egg": load_image(IMAGES_BASE_PATH + "boss/exp_egg.png"),
+    "crack": load_image(IMAGES_BASE_PATH + "boss/crack.png"),
     "background": [load_image(IMAGES_BASE_PATH + "trader/ocr.jpg"), ""],
     "rock": [
         load_image(IMAGES_BASE_PATH + "objects/rock1.png"),

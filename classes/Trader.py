@@ -62,7 +62,6 @@ class Trader(pygame.sprite.Sprite):
         self.is_said = value
 
     def set_text(self, text="", obj=None, first_time=False, last_time=False):
-        print(f"first: {first_time} last: {last_time}")
         if first_time:
             if self.speech_counter < len(SPEECH):
                 self.text = SPEECH[self.speech_counter]

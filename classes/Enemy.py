@@ -9,20 +9,23 @@ class EnemyVision(pygame.sprite.Sprite):
         super().__init__(pygame.sprite.Group())
         self.host, self.range = enemy, range
         self.image = pygame.Surface((3 * self.range, 3 * self.range), pygame.SRCALPHA, 32)
-        if entype == "slime":
+        self.entype = entype
+        if self.entype == "slime":
             pygame.draw.rect(self.image, (255, 0, 0), (self.range - 10, self.range - 16, 22, 5))
             self.rect = pygame.Rect(coords[0] - self.range + 10.5, coords[1] - self.range + 12, 1.85 * self.range, 1.85 * self.range)
             self.is_noticed = False
-        elif entype == "boss":
+        elif self.entype == "boss":
             self.rect = pygame.Rect(coords[0] - self.range + 32, coords[1] - self.range + 32, 1.85 * 2 * self.range, 1.85 * 2 * self.range)
-
 
     def update(self, screen):
         pygame.draw.rect(self.image, (0, 0, 0), (self.range - 10, self.range - 16, 22, 5))
         pygame.draw.rect(self.image, (255, 0, 0), (self.range - 9, self.range - 15, (self.host.get_health() / self.host.get_max_health() * 22 - 2), 3))
 
     def move(self, del_x, del_y):
-        self.rect = self.rect.move(del_x, del_y)
+        try:
+            self.rect = self.rect.move(del_x, del_y)
+        except Exception as error:
+            pass
 
     def exp_vision(self):
         pygame.draw.circle(self.image, (255, 0, 0), (self.range, self.range), self.range, 1)

@@ -4,6 +4,8 @@ from random import choice
 from itertools import cycle
 from classes.Enemy import EnemyVision
 from classes.Object import Object
+from classes.Crack import Crack
+from classes.Egg import Egg
 from helpers.images import BOSS_SETS
 from helpers.images import OTHER_OBJECTS
 
@@ -15,16 +17,17 @@ class Boss(pygame.sprite.Sprite):
 	frames = []
 	speed = 3
 
-	def __init__(self, coords):
+	def __init__(self, coords, game_params):
 		super().__init__(pygame.sprite.Group())
 		self.rect = pygame.Rect(coords[0], coords[1], 64, 64)
 		self.coords = coords
 		self.mask = pygame.mask.from_surface(self.image)
-		self.vision = EnemyVision(200, (self.rect.x, self.rect.y), self, "boss")
+		self.vision = EnemyVision(500, (self.rect.x, self.rect.y), self, "boss")
 		self.crown = None
+		self.game_params = game_params
 
 		self.die_flag = False
-		self.attack = False
+		self.is_attack = False
 		self.angry = False
 		self.is_changed = False
 		self.spawn = False
@@ -33,9 +36,9 @@ class Boss(pygame.sprite.Sprite):
 		self.can_move = True
 		self.frame_counter = cycle(range(self.required_counter))
 
-		self.health = self.current_health = 100
+		self.health = self.current_health = 30000
 
-	def move(self, hero, hero_group):
+	def move(self, hero, hero_group, game_params):
 		if self.vision.check(hero_group):
 			self.angry = True
 
@@ -57,9 +60,9 @@ class Boss(pygame.sprite.Sprite):
 						del_x = elem
 
 			if abs(hero.get_coords()[0] - self.rect.x) <= 100 and abs(
-					hero.get_coords()[1] - self.rect.y) <= 100 and not self.die_flag and self.angry and not self.attack and not self.spawn:
-				if choice([False, False, False, True]):
-					self.attack = True
+					hero.get_coords()[1] - self.rect.y) <= 100 and not self.die_flag and self.angry and not self.is_attack and not self.spawn:
+				if choice([True, True, True, False, False]):
+					self.is_attack = True
 					self.frame_counter = cycle(range(len(BOSS_SETS["attack"]) + 1))
 				else:
 					self.spawn = True
@@ -68,33 +71,34 @@ class Boss(pygame.sprite.Sprite):
 			self.vision.move(del_y, del_x)
 			self.rect = self.rect.move(del_y, del_x)
 
-		self.update()
+		self.update(game_params)
 
-	def update(self):
+	def update(self, game_params):
 		if self.iter_counter == self.required_counter:
 			ind = int(next(self.frame_counter))
 
 			if self.die_flag:
 				self.frames = BOSS_SETS["die"]
 				self.can_move = False
-				self.attack = False
+				self.is_attack = False
 				self.image = self.frames[ind]
 
 				if self.frames[ind] == self.frames[-1]:
 					self.vision.kill()
 					self.kill()
 
-			elif self.attack:
+			elif self.is_attack:
 				self.frames = BOSS_SETS["attack"]
 				self.can_move = False
 				self.image = self.frames[ind]
 
 				if self.frames[ind] == self.frames[-1]:
 					self.frames = BOSS_SETS["idle"]
+					self.attack(game_params)
 					self.required_counter = 4
 					self.frame_counter = cycle(range(self.required_counter))
 					ind = int(next(self.frame_counter))
-					self.can_move, self.attack = True, False
+					self.can_move, self.is_attack = True, False
 
 			elif self.spawn:
 				self.frames = BOSS_SETS["spawn_minion"]
@@ -103,6 +107,7 @@ class Boss(pygame.sprite.Sprite):
 
 				if self.frames[ind] == self.frames[-1]:
 					self.frames = BOSS_SETS["idle"]
+					self.spawn_minion(game_params)
 					self.required_counter = 4
 					self.frame_counter = cycle(range(self.required_counter))
 					ind = int(next(self.frame_counter))
@@ -114,6 +119,16 @@ class Boss(pygame.sprite.Sprite):
 			self.iter_counter = 0
 
 		self.iter_counter += 1
+
+	def spawn_minion(self, game_params):
+		minion = Egg(choice(["regular", "exp", "exp"]), self.rect.center, game_params)
+		self.game_params["egg_group"].add(minion)
+
+	def attack(self, game_params):
+		_list = [-70, -40, 40, 70]
+		for i in _list:
+			for j in _list:
+				self.game_params["crack_group"].add(Crack([self.rect.center[0] + i, self.rect.center[1] + j], 10, game_params))
 
 	def draw_hp_bar(self, screen):
 		pygame.draw.rect(screen, (0, 0, 0), (10, 470, 980, 25))
@@ -135,6 +150,9 @@ class Boss(pygame.sprite.Sprite):
 			self.die_flag = True
 			self.current_health = 0
 			self.frame_counter = cycle(range(len(BOSS_SETS["die"])))
+
+	def get_angry(self):
+		return self.angry
 
 	def is_die(self):
 		if not self.is_crown_dropped:
