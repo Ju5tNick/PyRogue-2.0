@@ -73,12 +73,11 @@ class Trader(pygame.sprite.Sprite):
                 self.speech_counter += 1
 
         else:    
-            if obj != None:
+            if obj is not None:
                 self.text = obj.get_info()
             elif text != "":
                 self.text = text
             self.speech_counter = 0
-            # self.reset_flag(False)
 
     def get_text(self):
         return self.text

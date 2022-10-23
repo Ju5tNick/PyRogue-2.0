@@ -13,7 +13,6 @@ from classes.ExpSlime import ExpSlime
 from classes.Sound import Sound
 from classes.Tile import AvailableTile, UnavailableTile
 from classes.Trader import Trader
-from classes.Tips import Tip
 from classes.Boss import Boss
 from helpers.common import terminate
 from helpers.config import *
@@ -65,7 +64,7 @@ class Game:
         self.nearest_trader = Trader()
         self.trader.add(self.nearest_trader)
         self.tips.add(TIPS[0])
-        
+        self.game_win = False
 
         self.background.add(Object(
             OTHER_OBJECTS["background"][0], [0, 0], [TILES_COUNT_X * TILE_WIDTH, TILES_COUNT_Y * TILE_HEIGHT],
@@ -83,17 +82,17 @@ class Game:
         self.available_tile, self.unavailable_tile = self.render_map(self.chunk)
 
         self.params = {
-                        "hero": self.hero,
-                        "chunk": self.chunk,
-                        "hero_group": self.mainhero,
-                        "available_tile": self.available_tile,
-                        "enemy_visions": self.enemy_visions,
-                        "clots": self.clots,
-                        "screen": self.screen,  
-                        "game": Game,
-                        "egg_group": self.eggs,
-                        "crack_group": self.cracks
-                    }
+            "hero": self.hero,
+            "chunk": self.chunk,
+            "hero_group": self.mainhero,
+            "available_tile": self.available_tile,
+            "enemy_visions": self.enemy_visions,
+            "clots": self.clots,
+            "screen": self.screen,
+            "game": Game,
+            "egg_group": self.eggs,
+            "crack_group": self.cracks
+        }
 
     def render_map(self, chunk):
         cant_go = pygame.sprite.Group()
@@ -274,7 +273,7 @@ class Game:
             self.cracks.draw(self.screen)
             self.boss.draw(self.screen)
             self.eggs.draw(self.screen)
-            
+
             if not without_hero:
                 self.mainhero.draw(self.screen)
                 pygame.draw.circle(self.screen, (101, 101, 101), (self.hero.get_coords()[0] + 19 / 2,
@@ -375,11 +374,15 @@ class Game:
     def handle_sounds(self):
         is_not_gameplay_or_trader = self.now_playing not in ["gameplay", "trader"]
         is_not_trader = self.now_playing == "trader" and not self.is_trader_active
+        is_not_enemies = not self.enemies and not self.boss
 
-        if not any(self.enemies) and is_not_gameplay_or_trader or is_not_trader or self.now_playing is None:
+        if is_not_enemies and is_not_gameplay_or_trader or is_not_trader or self.now_playing is None:
             if Sound.overlay(SOUNDS["SOUNDTRACKS"]["gameplay"]):
                 self.now_playing = "gameplay"
-        if any(self.enemies) and self.now_playing != "fight":
+        if self.boss and self.now_playing != "boss-fight":
+            if Sound.overlay(SOUNDS["SOUNDTRACKS"]["boss-fight"]):
+                self.now_playing = "boss-fight"
+        if self.enemies and not self.boss and self.now_playing != "fight":
             if Sound.overlay(SOUNDS["SOUNDTRACKS"]["fight"]):
                 self.now_playing = "fight"
         if self.is_trader_active and self.now_playing != "trader":
@@ -412,7 +415,7 @@ class Game:
         first_start = True
         event = None
 
-        while self.hero.is_alive():
+        while self.hero.is_alive() and not self.game_win:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     terminate()
@@ -433,12 +436,15 @@ class Game:
                     if keys[pygame.K_LSHIFT]:
                         if not self.is_trader_active and self.hero.get_move() and self.hero.get_stamina()[1] > 20:
                             self.hero.set_flag(True)
+                            pygame.event.post(pygame.event.Event(ON_CHANGE_HERO_SPEED))
                         else:
                             self.hero.set_flag(False)
+                            pygame.event.post(pygame.event.Event(ON_CHANGE_HERO_SPEED))
 
                 if event.type == pygame.KEYUP:
                     if event.key == pygame.K_LSHIFT:
                         self.hero.set_flag(False)
+                        pygame.event.post(pygame.event.Event(ON_CHANGE_HERO_SPEED))
 
                 if not self.is_trader_active:
                     self.hero.move(event)
@@ -450,7 +456,8 @@ class Game:
 
                         if self.nearest_trader.get_text() == FINAL_SPEECH[-1] and self.hero.get_with_crown():
                             self.hero.with_crown = False
-                            self.is_trader_active = False
+                            Sound.stop("bg-music", fade=1000)
+                            self.game_win = True
 
                         elif self.nearest_trader.get_text() == SPEECH[-1] and self.is_first_time_at_merchant:
                             self.is_first_time_at_merchant = False
@@ -461,7 +468,8 @@ class Game:
 
                             for elem in self.shop:
                                 if elem.check(event.pos):
-                                    self.nearest_trader.set_text(obj=elem, first_time=self.is_first_time_at_merchant, last_time=self.hero.get_with_crown())
+                                    self.nearest_trader.set_text(obj=elem, first_time=self.is_first_time_at_merchant,
+                                                                 last_time=self.hero.get_with_crown())
                                     self.is_chosen = [True, self.nearest_trader.get_text(), elem]
                                     self.nearest_trader.say(self.screen)
                                     break
@@ -483,7 +491,8 @@ class Game:
 
                     if self.is_weapon_active:
                         for elem in self.weapons:
-                            self.is_weapon_active = elem.move(*event.pos, *event.rel, self.hero, self.enemies, self.boss,
+                            self.is_weapon_active = elem.move(*event.pos, *event.rel, self.hero, self.enemies,
+                                                              self.boss,
                                                               self.is_weapon_active)
                         for elem in self.weapons:
                             self.is_weapon_active = elem.move(*event.pos, *event.rel, self.hero, self.eggs, self.boss,
@@ -493,7 +502,7 @@ class Game:
                 self.hero.current_stamina -= 5
             if self.hero.current_stamina < 5 and self.hero.get_running():
                 self.hero.set_flag(False)
-                pygame.event.post(pygame.event.Event(ON_END_STAMINA))
+                pygame.event.post(pygame.event.Event(ON_CHANGE_HERO_SPEED))
 
             self.check_tile()
             self.handle_sounds()
@@ -506,9 +515,9 @@ class Game:
 
             x, y = self.hero.get_coords()
 
-            if ((TILES_COUNT_X * TILE_WIDTH - 5 <= x or x <= 5 or TILES_COUNT_Y * TILE_HEIGHT - 5 <= y or y <= 5) 
-                and not self.is_someone_angry and not self.is_boss_angry and not self.is_first_time_at_merchant ):
-                
+            if ((TILES_COUNT_X * TILE_WIDTH - 5 <= x or x <= 5 or TILES_COUNT_Y * TILE_HEIGHT - 5 <= y or y <= 5)
+                    and not self.is_someone_angry and not self.is_boss_angry and not self.is_first_time_at_merchant):
+
                 if TILES_COUNT_X * TILE_WIDTH - 5 <= x:
                     self.cur_x += 1
 
@@ -544,12 +553,12 @@ class Game:
                         "available_tile": self.available_tile,
                         "enemy_visions": self.enemy_visions,
                         "clots": self.clots,
-                        "screen": self.screen,  
+                        "screen": self.screen,
                         "game": Game,
                         "egg_group": self.eggs,
                         "crack_group": self.cracks
                     }
-                    
+
                     if self.cur_y == 0 and self.cur_x == 0 and self.boss != pygame.sprite.Group():
                         self.boss.add(Boss([300, 300], self.params))
                     else:
@@ -562,7 +571,8 @@ class Game:
                     for _ in range(randrange(10, 15)):
                         self.params["game"] = Game
                         self.enemies.add(
-                            ExpSlime("name", "explosion", 40, 100, 10, randrange(15, 26), randrange(20, 31), self.params))
+                            ExpSlime("name", "explosion", 40, 100, 10, randrange(15, 26), randrange(20, 31),
+                                     self.params))
 
                     self.field[self.cur_y][
                         self.cur_x] = self.available_tile, self.unavailable_tile, self.other_obj, self.enemies, self.enemy_visions, self.trader, self.clots, self.chunk, self.coins, self.boss, self.eggs, self.cracks
@@ -595,6 +605,7 @@ class Game:
 
             if self.hero.get_stamina()[1] <= 0:
                 self.hero.set_flag(False)
+                pygame.event.post(pygame.event.Event(ON_CHANGE_HERO_SPEED))
 
             if first_start:
                 Image.alt_fade(self.screen, self.clock, self.draw_sprites)

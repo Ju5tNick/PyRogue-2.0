@@ -34,6 +34,10 @@ SOUNDS = {
             "path": [SOUNDS_BASE_PATH + f"soundtracks/fight/{i}.mp3" for i in range(1, 4)],
             "channel": "bg-music",
         },
+        "boss-fight": {
+            "path": SOUNDS_BASE_PATH + f"soundtracks/fight/boss-fight.mp3",
+            "channel": "bg-music",
+        },
         "trader": {
             "path": SOUNDS_BASE_PATH + "soundtracks/trader.mp3",
             "channel": "bg-music",
@@ -43,7 +47,11 @@ SOUNDS = {
         "game-over": {
             "path": SOUNDS_BASE_PATH + "game/game-over.mp3",
             "channel": "main",
-        }
+        },
+        "boss-win": {
+            "path": SOUNDS_BASE_PATH + "game/boss-win.wav",
+            "channel": "main",
+        },
     },
     "HERO": {
         "hit": {

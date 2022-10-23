@@ -13,8 +13,6 @@ HERO_RUNNING_SPEED = 8
 HERO_BASE_SPEED = 4
 HERO_SPRITE_SIZE = [19, 31]
 
-# FADE_IN/OUT_SPEED = ...
-
 #
 #   Config      #
 
@@ -31,4 +29,4 @@ MAX_TIP_LENGTH = 180
 # Custom pygame events    #
 
 ON_CHANGE_TILE = pygame.USEREVENT + 1
-ON_END_STAMINA = pygame.USEREVENT + 2
+ON_CHANGE_HERO_SPEED = pygame.USEREVENT + 2

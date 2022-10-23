@@ -4,7 +4,7 @@ from itertools import cycle
 
 from classes.Sound import Sound
 from classes.Weapon import Weapon
-from helpers.config import HERO_RUNNING_SPEED, HERO_BASE_SPEED, ON_CHANGE_TILE
+from helpers.config import HERO_RUNNING_SPEED, HERO_BASE_SPEED, ON_CHANGE_TILE, ON_CHANGE_HERO_SPEED
 from helpers.images import HERO_SETS
 from helpers.sounds import SOUNDS
 
@@ -25,7 +25,7 @@ class MainHero(pygame.sprite.Sprite):
         self.is_running = False
         self.last_tile = "land"
 
-        self.weapon = Weapon(10, [20, 10], 100)
+        self.weapon = Weapon(100000000000000, [20, 10], 100)
         self.mask = pygame.mask.from_surface(self.image)
         self.rect = self.rect.move(coords[0], coords[1])
         self.stamina = self.current_stamina = 200
@@ -41,14 +41,22 @@ class MainHero(pygame.sprite.Sprite):
         self.handling(event)
 
         postfix = "-in-water" if self.last_tile == "water" else ""
-        force = event.type == ON_CHANGE_TILE
+        force = event.type in [ON_CHANGE_TILE, ON_CHANGE_HERO_SPEED]
         if self.get_move():
             if self.get_running():
                 Sound.play(SOUNDS["HERO"][f"run{postfix}"], force)
             else:
                 Sound.play(SOUNDS["HERO"][f"step{postfix}"], force)
+
         if not self.get_move():
             Sound.stop("movement")
+
+    def check_speed(self, arg1, arg2):
+        for x in [arg1, arg2]:
+            for y in [self.vel.x, self.vel.y]:
+                if x == y:
+                    return True
+        return False
 
     def handling(self, event):
         if event.type == pygame.KEYDOWN:
@@ -96,6 +104,7 @@ class MainHero(pygame.sprite.Sprite):
     def stop(self):
         self.vel.x = 0
         self.vel.y = 0
+        self.set_flag(False)
         Sound.stop("movement")
 
     def set_flag(self, flag):
