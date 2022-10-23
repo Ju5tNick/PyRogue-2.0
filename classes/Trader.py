@@ -6,6 +6,7 @@ from helpers.images import TRADER_SETS, POTIONS, MERCHANT_PHRASES
 from classes.Object import Object
 from classes.Dialog import Dialog
 from helpers.sounds import SOUNDS
+from helpers.trader_speech import *
 
 
 class Trader(pygame.sprite.Sprite):
@@ -20,6 +21,7 @@ class Trader(pygame.sprite.Sprite):
         self.is_said = True
         self.dialog = Dialog()
         self.text = ""
+        self.speech_counter = 0
         for i, potion in enumerate(POTIONS):
             if i <= 1:
                 self.trades.append(
@@ -59,12 +61,25 @@ class Trader(pygame.sprite.Sprite):
     def reset_flag(self, value):
         self.is_said = value
 
-    def set_text(self, text="", obj=None):
-        if obj != None:
-            self.text = obj.get_info()
-        elif text != "":
-            self.text = text
-        # self.reset_flag(False)
+    def set_text(self, text="", obj=None, first_time=False, last_time=False):
+        print(f"first: {first_time} last: {last_time}")
+        if first_time:
+            if self.speech_counter < len(SPEECH):
+                self.text = SPEECH[self.speech_counter]
+                self.speech_counter += 1
+
+        elif last_time:
+            if self.speech_counter < len(FINAL_SPEECH):
+                self.text = FINAL_SPEECH[self.speech_counter]
+                self.speech_counter += 1
+
+        else:    
+            if obj != None:
+                self.text = obj.get_info()
+            elif text != "":
+                self.text = text
+            self.speech_counter = 0
+            # self.reset_flag(False)
 
     def get_text(self):
         return self.text

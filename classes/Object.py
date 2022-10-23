@@ -1,6 +1,8 @@
 from random import choice
 
 import pygame
+from classes.Sound import Sound
+from helpers.sounds import SOUNDS
 
 
 class Object(pygame.sprite.Sprite):
@@ -29,6 +31,12 @@ class Object(pygame.sprite.Sprite):
         ):
             return True
         return False
+
+    def is_crossing(self, hero, hero_group):
+        if pygame.sprite.spritecollideany(self, hero_group):
+            hero.with_crown = True
+            Sound.play(SOUNDS["HERO"]["pick-coins"])
+            self.kill()
 
     def get_info(self):
         return self.info

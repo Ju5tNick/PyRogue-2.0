@@ -20,6 +20,7 @@ from helpers.config import *
 from helpers.images import OTHER_OBJECTS, load_image, MERCHANT_PHRASES
 from helpers.sounds import SOUNDS
 from helpers.tips import TIPS
+from helpers.trader_speech import *
 
 
 class Game:
@@ -54,6 +55,7 @@ class Game:
         self.tip_counter = 1
 
         self.is_weapon_active = False
+        self.is_first_time_at_merchant = True
         self.hero = MainHero([50, 50], 'MainHero', HERO_HP, money=HERO_MONEY)
         self.weapons.add(self.hero.get_weapon())
         self.mainhero.add(self.hero)
@@ -248,6 +250,10 @@ class Game:
             self.clots.draw(self.screen)
             self.coins.draw(self.screen)
             [boss.move(self.hero, self.mainhero) for boss in self.boss]
+
+            if all([boss.is_die() for boss in self.boss]):
+                [self.other_obj.add(boss.drop_crown()) for boss in self.boss]
+
             self.boss.draw(self.screen)
             
             if not without_hero:
@@ -257,6 +263,10 @@ class Game:
                                    self.hero.get_range(), 1)
             [tip.draw(self.screen) for tip in self.tips]
             [boss.draw_hp_bar(self.screen) for boss in self.boss]
+
+            for obj in self.other_obj:
+                if obj.image == OTHER_OBJECTS["crown"]:
+                    obj.is_crossing(self.hero, self.mainhero)
 
             if self.is_weapon_active:
                 self.weapons.draw(self.screen)
@@ -414,15 +424,27 @@ class Game:
                     self.nearest_trader.draw_interface(self)
 
                     if event.type == pygame.MOUSEBUTTONDOWN:
-                        for elem in self.shop:
-                            if elem.check(event.pos):
-                                self.nearest_trader.set_text(obj=elem)
-                                self.is_chosen = [True, self.nearest_trader.get_text(), elem]
-                                self.nearest_trader.say(self.screen)
-                                break
-                            else:
-                                self.is_chosen = [False, self.nearest_trader.get_text(), elem]
-                        self.nearest_trader.reset_flag(False)
+
+                        if self.nearest_trader.get_text() == FINAL_SPEECH[-1] and self.hero.get_with_crown():
+                            self.hero.with_crown = False
+                            self.is_trader_active = False
+
+                        elif self.nearest_trader.get_text() == SPEECH[-1] and self.is_first_time_at_merchant:
+                            self.is_first_time_at_merchant = False
+                            self.is_trader_active = False
+                            self.nearest_trader.speech_counter = 0
+
+                        elif self.is_trader_active:
+
+                            for elem in self.shop:
+                                if elem.check(event.pos):
+                                    self.nearest_trader.set_text(obj=elem, first_time=self.is_first_time_at_merchant, last_time=self.hero.get_with_crown())
+                                    self.is_chosen = [True, self.nearest_trader.get_text(), elem]
+                                    self.nearest_trader.say(self.screen)
+                                    break
+                                else:
+                                    self.is_chosen = [False, self.nearest_trader.get_text(), elem]
+                            self.nearest_trader.reset_flag(False)
                     else:
                         self.nearest_trader.reset_flag(True)
                 else:

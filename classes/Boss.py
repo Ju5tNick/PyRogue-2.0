@@ -3,7 +3,9 @@ import pygame
 from random import choice
 from itertools import cycle
 from classes.Enemy import EnemyVision
+from classes.Object import Object
 from helpers.images import BOSS_SETS
+from helpers.images import OTHER_OBJECTS
 
 
 class Boss(pygame.sprite.Sprite):
@@ -16,19 +18,22 @@ class Boss(pygame.sprite.Sprite):
 	def __init__(self, coords):
 		super().__init__(pygame.sprite.Group())
 		self.rect = pygame.Rect(coords[0], coords[1], 64, 64)
+		self.coords = coords
 		self.mask = pygame.mask.from_surface(self.image)
 		self.vision = EnemyVision(200, (self.rect.x, self.rect.y), self, "boss")
+		self.crown = None
 
 		self.die_flag = False
 		self.attack = False
 		self.angry = False
 		self.is_changed = False
 		self.spawn = False
+		self.is_crown_dropped = False
 		self.frames = BOSS_SETS["idle"]
 		self.can_move = True
 		self.frame_counter = cycle(range(self.required_counter))
 
-		self.health = self.current_health = 500
+		self.health = self.current_health = 100
 
 	def move(self, hero, hero_group):
 		if self.vision.check(hero_group):
@@ -51,9 +56,6 @@ class Boss(pygame.sprite.Sprite):
 					if abs(hero_coords[1] - (self.rect.y + elem)) < diff_x:
 						del_x = elem
 
-			self.vision.move(del_y, del_x)
-			self.rect = self.rect.move(del_y, del_x)
-
 			if abs(hero.get_coords()[0] - self.rect.x) <= 100 and abs(
 					hero.get_coords()[1] - self.rect.y) <= 100 and not self.die_flag and self.angry and not self.attack and not self.spawn:
 				if choice([False, False, False, True]):
@@ -62,6 +64,9 @@ class Boss(pygame.sprite.Sprite):
 				else:
 					self.spawn = True
 					self.frame_counter = cycle(range(len(BOSS_SETS["spawn_minion"]) + 1))
+
+			self.vision.move(del_y, del_x)
+			self.rect = self.rect.move(del_y, del_x)
 
 		self.update()
 
@@ -77,10 +82,9 @@ class Boss(pygame.sprite.Sprite):
 
 				if self.frames[ind] == self.frames[-1]:
 					self.vision.kill()
-					self.drop_crown()
 					self.kill()
 
-			if self.attack:
+			elif self.attack:
 				self.frames = BOSS_SETS["attack"]
 				self.can_move = False
 				self.image = self.frames[ind]
@@ -116,15 +120,24 @@ class Boss(pygame.sprite.Sprite):
 		pygame.draw.rect(screen, (70, 117, 93), (11, 471, (self.current_health / self.health) * 980 - 2, 23))
 		screen.blit(
             pygame.font.Font(None, 21).render("boss", True, (255, 255, 255)),
-            (430, 475))
+            (460, 475))
 
 	def drop_crown(self):
-		pass
+		if not self.is_crown_dropped:
+			self.crown = Object(OTHER_OBJECTS["crown"], self.rect.center, [11, 10], False)
+			self.is_crown_dropped = True
+			return self.crown
 
 	def get_damage(self, damage):
 		if self.current_health > 0:
 			self.current_health -= damage
-		if self.current_health <= 0:
+		if self.current_health <= 0 and not self.die_flag:
 			self.die_flag = True
+			self.current_health = 0
 			self.frame_counter = cycle(range(len(BOSS_SETS["die"])))
+
+	def is_die(self):
+		if not self.is_crown_dropped:
+			return self.die_flag
+		return False
 		

@@ -188,6 +188,7 @@ OTHER_OBJECTS = {
     "tall_grass": load_image(IMAGES_BASE_PATH + "objects/tall_grass.png"),
     "water_lily": load_image(IMAGES_BASE_PATH + "objects/water_lily.png"),
     "merchant": load_image(IMAGES_BASE_PATH + "trader/trader2.png"),
+    "crown": load_image(IMAGES_BASE_PATH + "objects/crown.png"),
     "background": [load_image(IMAGES_BASE_PATH + "trader/ocr.jpg"), ""],
     "rock": [
         load_image(IMAGES_BASE_PATH + "objects/rock1.png"),

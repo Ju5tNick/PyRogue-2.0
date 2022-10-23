@@ -35,6 +35,8 @@ class MainHero(pygame.sprite.Sprite):
         self.vel = Vector2(0, 0)
         self.speed = HERO_BASE_SPEED
 
+        self.with_crown = False
+
     def move(self, event):
         self.handling(event)
 
@@ -216,3 +218,6 @@ class MainHero(pygame.sprite.Sprite):
     def pay(self, value):
         Sound.play(SOUNDS["HERO"]["pick-coins"])
         self.balance += value
+
+    def get_with_crown(self):
+        return self.with_crown
