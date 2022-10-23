@@ -60,7 +60,7 @@ class Egg(pygame.sprite.Sprite):
 			if self.rect == self.rect.move(del_y, del_x):
 
 				if pygame.sprite.spritecollideany(self, self.game_params["hero_group"]):
-					self.game_params["hero"].get_damage(20, self.game_params["game"])
+					self.game_params["hero"].get_damage(40, self.game_params["game"])
 
 				if self.egg_type == "regular":
 					minion = Slime("name", "regular", 10, 350, 2, randrange(1, 11), 
@@ -70,7 +70,7 @@ class Egg(pygame.sprite.Sprite):
 					minion.angry = True
 
 				elif self.egg_type == "exp":
-					minion = ExpSlime("name", "explosion", 40, 150, 10, randrange(15, 26), 
+					minion = ExpSlime("name", "explosion", 60, 150, 10, randrange(15, 26), 
 						randrange(20, 31), self.game_params, coords=[self.rect.x, self.rect.y])
 
 					self.self_group.add(minion)

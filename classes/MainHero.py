@@ -25,7 +25,7 @@ class MainHero(pygame.sprite.Sprite):
         self.is_running = False
         self.last_tile = "land"
 
-        self.weapon = Weapon(100000000000000, [20, 10], 100)
+        self.weapon = Weapon(7, [20, 10], 100)
         self.mask = pygame.mask.from_surface(self.image)
         self.rect = self.rect.move(coords[0], coords[1])
         self.stamina = self.current_stamina = 200
