@@ -582,15 +582,22 @@ class Game:
                     else:
                         self.boss = pygame.sprite.Group()
 
-                    for _ in range(randrange(10, 15)):
-                        self.enemies.add(
-                            Slime("name", "regular", 10, 200, 2, randrange(1, 11), randrange(10, 21), self.params))
+                    if choice([0, 0, 1]):
+                        for _ in range(30):
+                            self.params["game"] = Game
+                            self.enemies.add(
+                                ExpSlime("name", "explosion", 40, 100, 10, randrange(15, 26), randrange(20, 31),
+                                         self.params))
+                    else:
+                        for _ in range(randrange(10, 15)):
+                            self.enemies.add(
+                                Slime("name", "regular", 10, 200, 2, randrange(1, 11), randrange(10, 21), self.params))
 
-                    for _ in range(randrange(10, 15)):
-                        self.params["game"] = Game
-                        self.enemies.add(
-                            ExpSlime("name", "explosion", 40, 100, 10, randrange(15, 26), randrange(20, 31),
-                                     self.params))
+                        for _ in range(randrange(10, 15)):
+                            self.params["game"] = Game
+                            self.enemies.add(
+                                ExpSlime("name", "explosion", 40, 100, 10, randrange(15, 26), randrange(20, 31),
+                                         self.params))
 
                     self.field[self.cur_y][
                         self.cur_x] = self.available_tile, self.unavailable_tile, self.other_obj, self.enemies, self.enemy_visions, self.trader, self.clots, self.chunk, self.coins, self.boss, self.eggs, self.cracks
