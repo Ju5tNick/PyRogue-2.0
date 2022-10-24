@@ -47,6 +47,7 @@ class Game:
         self.eggs = pygame.sprite.Group()
 
         self.field = [[None for _ in range(FIELD_SIZE_X)] for _ in range(FIELD_SIZE_Y)]
+        self.minimap = [[None for _ in range(FIELD_SIZE_X)] for _ in range(FIELD_SIZE_Y)]
         self.cur_x = self.cur_y = 2
         self.new_x = self.new_y = cycle([2, 3, 4, 0, 1])
         self.is_trader_active = False
@@ -281,6 +282,18 @@ class Game:
                                    self.hero.get_range(), 1)
             [tip.draw(self.screen) for tip in self.tips]
             [boss.draw_hp_bar(self.screen) for boss in self.boss]
+
+            for i, elem in enumerate(self.minimap):
+                
+                for j, el in enumerate(elem):
+                    if i == self.cur_y and j == self.cur_x:
+                        pygame.draw.rect(self.screen, (0, 0, 255), (920 + 15 * j, 420 + i * 15, 10, 10))
+                    elif i == 0 and j == 0:
+                        pygame.draw.rect(self.screen, (255, 0, 0), (920 + 15 * j, 420 + i * 15, 10, 10))
+                    elif i == 2 and j == 2:
+                        pygame.draw.rect(self.screen, (0, 255, 0), (920 + 15 * j, 420 + i * 15, 10, 10))
+                    else:
+                        pygame.draw.rect(self.screen, (0, 0, 0), (920 + 15 * j, 420 + i * 15, 10, 10))
 
             for obj in self.other_obj:
                 if obj.image == OTHER_OBJECTS["crown"]:
