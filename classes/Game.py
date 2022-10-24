@@ -414,9 +414,9 @@ class Game:
         return self.now_playing
 
     def start(self):
+        self.run_schedule_actions()
         while True:
             self.start_screen()
-            self.run_schedule_actions()
             self.loop()
             self.__init__()
 
