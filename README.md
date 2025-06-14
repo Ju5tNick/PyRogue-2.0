@@ -33,7 +33,7 @@ PyRogue 2.0 - это захватывающая игра в жанре rogue-lik
 1. Убедитесь, что у вас установлен Python 3.7 или выше
 2. Клонируйте репозиторий:
 ```bash
-git clone https://github.com/yourusername/PyRogue-2.0.git
+git clone https://github.com/Ju5tNick/PyRogue-2.0.git
 cd PyRogue-2.0
 ```
 
@@ -51,6 +51,7 @@ python main.py
 ## Управление
 
 - WASD - перемещение
+- Shift - ускорение
 - Движение мышкой - атака
 - E - взаимодействие с торговцем
 
